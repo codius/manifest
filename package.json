@@ -4,7 +4,8 @@
   "description": "A module for validating Codius manifests",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "nyc mocha",
+    "lint": "eslint ."
   },
   "keywords": [
     "codius",
@@ -22,6 +23,7 @@
     "eslint": "^4.16.0",
     "eslint-config-standard": "^11.0.0-beta.0",
     "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-mocha": "^5.0.0",
     "eslint-plugin-node": "^5.2.1",
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-standard": "^3.0.1",
@@ -29,6 +31,7 @@
     "nyc": "^11.8.0",
     "sinon": "^5.0.10"
   },
+
   "dependencies": {
     "boom": "^7.2.0",
     "canonical-json": "0.0.4",

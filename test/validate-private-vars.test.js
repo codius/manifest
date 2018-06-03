@@ -22,6 +22,16 @@ describe('Validate Private Manifest Variables', function () {
     expect(result).to.deep.equal(expected)
   })
 
+  it('should return errors if public variables are not defined', function () {
+    let manifest = JSON.parse(testManifest)
+    delete manifest['manifest']['vars']
+    const result = validatePrivateVars(manifest)
+    expect(result).to.deep.equal([{
+      'manfiest.private': 'cannot validate private vars - public vars are ' +
+      'not defined.'
+    }])
+  })
+
   it('should return errors if a private variable is never used in a container', function () {
     let manifest = JSON.parse(testManifest)
     delete manifest['manifest']['containers'][0]['environment']['AWS_SECRET_KEY']

@@ -2,12 +2,19 @@ const addErrorMessage = require('./common/add-error.js').addErrorMessage
 const hashPrivateVars = require('./common/crypto-utils.js').hashPrivateVars
 
 // Check hash of a single private variables
-const validatePrivateVars = function (manifest, containerId) {
+const validatePrivateVars = function (manifest) {
   let errors = []
-  const privateVarHashes = hashPrivateVars(manifest)
   const publicVars = manifest['manifest']['vars']
+
+  // Check if public vars are defined
+  if (!publicVars) {
+    addErrorMessage(errors, 'manfiest.private', 'cannot validate private vars' +
+      ` - public vars are not defined.`)
+    return errors
+  }
+
+  const privateVarHashes = hashPrivateVars(manifest)
   const privateVarKeys = Object.keys(manifest['private']['vars'])
-  const envVars = manifest['manifest']['containers'][containerId]['environment']
 
   // Check if the private variable hashes are consistent
   privateVarKeys.map((varName) => {
@@ -21,12 +28,25 @@ const validatePrivateVars = function (manifest, containerId) {
     }
 
     // Check if private variable is defined within container
-    if (!envVars[varName]) {
+    const containers = manifest['manifest']['containers']
+    const isUsed = checkUsage(containers, varName)
+    if (!isUsed) {
       addErrorMessage(errors, varName, 'private var is never used within containers ' +
         `var=${varName}`)
     }
   })
   return errors
+}
+
+const checkUsage = function (containers, varName) {
+  // Check if private var is used in a container
+  for (let i = 0; i < containers.length; i++) {
+    const envVars = containers[i]['environment']
+    if (envVars[varName]) {
+      return true
+    }
+  }
+  return false
 }
 
 exports.validatePrivateVars = validatePrivateVars

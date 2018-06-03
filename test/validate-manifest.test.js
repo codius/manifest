@@ -3,7 +3,7 @@ const testManifest = JSON.stringify(require('./mocks/manifest.test.json'))
 const validateManifest = require('../src/validate-manifest.js').validateManifest
 
 describe('Validate Entire Manifest', function () {
-  it('should not return manifest is valid', function () {
+  it('should not return errors if manifest is valid', function () {
     let manifest = JSON.parse(testManifest)
     const result = validateManifest(manifest)
     expect(result).to.deep.equal([])

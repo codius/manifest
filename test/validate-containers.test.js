@@ -1,4 +1,3 @@
-const debug = require('debug')('validate-containers')
 const expect = require('chai').expect
 const testManifest = JSON.stringify(require('./mocks/manifest.test.json'))
 const validateContainers = require('../src/validate-containers.js').validateContainers
@@ -29,7 +28,6 @@ describe('Validate Containers in Manifest', function () {
     // Insert environment variable without adding it to manifest.vars
     let environment = manifest['manifest']['containers'][0]['environment']
     environment['ENV_VAR'] = '$ENV_VAR'
-    debug(JSON.stringify(manifest))
     const result = validateContainers(manifest)
     const expected = [
       { ENV_VAR: 'env variable is not defined within manifest vars. var=ENV_VAR' },

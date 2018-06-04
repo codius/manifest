@@ -1,4 +1,4 @@
-const addErrorMessage = require('./common/add-error.js').addErrorMessage
+const { addErrorMessage } = require('./common/add-error.js')
 
 const validateContainers = function (manifest) {
   let errors = []
@@ -11,9 +11,10 @@ const validateContainers = function (manifest) {
     Object.keys(environment).map((varName) => {
       // Check if env variable name begins with `CODIUS`
       if (varName.startsWith('CODIUS')) {
-        addErrorMessage(errors, varName, 'environment variables starting in ' +
-          '"CODIUS" are reserved. ' +
-          `var=${varName}`)
+        addErrorMessage(
+          errors, `manifest.containers[${i}].environment.${varName}`,
+          'environment variables starting in `CODIUS` are reserved.'
+        )
       }
 
       // Check if env variable is defined within manifest vars
@@ -37,4 +38,4 @@ const validateContainers = function (manifest) {
   return errors
 }
 
-exports.validateContainers = validateContainers
+module.exports = { validateContainers }

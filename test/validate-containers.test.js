@@ -34,7 +34,8 @@ describe('Validate Containers in Manifest', function () {
     const result = validateContainers(manifest)
     const expected = [
       { ENV_VAR: 'env variable is not defined within manifest vars. var=ENV_VAR' },
-      { CODIUS_HOST: 'environment variables starting in "CODIUS" are reserved. var=CODIUS_HOST' }
+      { 'manifest.containers[1].environment.CODIUS_HOST':
+      'environment variables starting in `CODIUS` are reserved.' }
     ]
     expect(result).to.deep.equal(expected)
   })
@@ -46,8 +47,9 @@ describe('Validate Containers in Manifest', function () {
     manifest['private']['vars']['CODIUS_VAR'] = {'nonce': '1242352353', 'value': ''}
 
     const result = validateContainers(manifest)
-    const expected = [{ CODIUS_VAR: 'environment variables starting in' +
-      ' "CODIUS" are reserved. var=CODIUS_VAR' }]
+    const expected = [{ 'manifest.containers[0].environment.CODIUS_VAR':
+    'environment variables starting in `CODIUS` are reserved.'
+    }]
     expect(result).to.deep.equal(expected)
   })
 

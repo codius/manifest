@@ -14,12 +14,10 @@ describe('Validate Public Manifest Variables', function () {
     expect(result).to.deep.equal([])
   })
 
-  it('should return errors if public variables are not defined', function () {
+  it('should not return errors if public variables are not defined', function () {
     delete manifest['manifest']['vars']
     const result = validatePublicVars(manifest)
-    expect(result).to.deep.equal([{
-      'manifest.vars': 'public vars are not defined. var=manifest.var'
-    }])
+    expect(result).to.deep.equal([])
   })
 
   it('should return errors if public variables are not used in environment', function () {

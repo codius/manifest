@@ -20,5 +20,4 @@ const hashPrivateVars = function (manifest) {
   return privateVarHashes
 }
 
-exports.generateNonce = generateNonce
-exports.hashPrivateVars = hashPrivateVars
+module.exports = { generateNonce, hashPrivateVars }

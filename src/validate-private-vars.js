@@ -1,5 +1,6 @@
 const addErrorMessage = require('./common/add-error.js').addErrorMessage
 const hashPrivateVars = require('./common/crypto-utils.js').hashPrivateVars
+const checkUsage = require('./common/check-usage.js').checkUsage
 
 // Check hash of a single private variables
 const validatePrivateVars = function (manifest) {
@@ -36,17 +37,6 @@ const validatePrivateVars = function (manifest) {
     }
   })
   return errors
-}
-
-const checkUsage = function (containers, varName) {
-  // Check if private var is used in a container
-  for (let i = 0; i < containers.length; i++) {
-    const envVars = containers[i]['environment']
-    if (envVars[varName]) {
-      return true
-    }
-  }
-  return false
 }
 
 exports.validatePrivateVars = validatePrivateVars

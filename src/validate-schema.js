@@ -13,17 +13,10 @@ const parseSchemaErrors = function (errorList) {
 
   for (let i = 0; i < errorList.length; i++) {
     const error = errorList[i]
-    const varName = parseVarPath(error['path'])
     const errorfmt = (JSON.stringify(error)).replace(/"/g, "'")
-    addErrorMessage(errors, varName, `schema is invalid. errors=${JSON.stringify(errorfmt)}`)
+    addErrorMessage(errors, error['path'], `schema is invalid. errors=${JSON.stringify(errorfmt)}`)
   }
   return errors
-}
-
-const parseVarPath = function (path) {
-  // Get variable name from object path
-  const tokens = path.split('.')
-  return tokens.slice(-1).pop()
 }
 
 exports.validateSchema = validateSchema

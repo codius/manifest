@@ -26,7 +26,7 @@ describe('Validate Entire Manifest', function () {
     const result = validateManifest(manifest)
     const expected = [
       { CODIUS_VAR: 'environment variables starting in "CODIUS" are reserved. var=CODIUS_VAR' },
-      { name: "schema is invalid. errors=\"{'path':'manifest.name','keyword':" +
+      { 'manifest.name': "schema is invalid. errors=\"{'path':'manifest.name','keyword':" +
         "'required'}\""}
     ]
     expect(result).to.deep.equal(expected)

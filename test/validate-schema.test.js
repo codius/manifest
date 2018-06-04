@@ -18,7 +18,7 @@ describe('Validate Manifest Schema', function () {
     delete manifest['manifest']['name']
     const result = validateSchema(manifest)
     expect(result).to.deep.equal([{
-      'name': "schema is invalid. errors=\"{'path':'manifest.name'," +
+      'manifest.name': "schema is invalid. errors=\"{'path':'manifest.name'," +
         "'keyword':'required'}\""
     }])
   })
@@ -37,7 +37,7 @@ describe('Validate Manifest Schema', function () {
     manifest['manifest']['name'] = 5
     const result = validateSchema(manifest)
     expect(result).to.deep.equal([{
-      'name': "schema is invalid. errors=\"{'path':'manifest.name'," +
+      'manifest.name': "schema is invalid. errors=\"{'path':'manifest.name'," +
       "'keyword':'type'}\""
     }])
   })

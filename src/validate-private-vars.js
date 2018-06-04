@@ -5,6 +5,10 @@ const validatePrivateVars = function (manifest) {
   let errors = []
   const publicVars = manifest['manifest']['vars']
 
+  // Check if private vars are not defined
+  if (!manifest['private']) {
+    return errors
+  }
   // Check if public vars are defined
   if (!publicVars) {
     addErrorMessage(errors, 'private', 'cannot validate private vars' +

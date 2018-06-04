@@ -26,11 +26,6 @@ const validateContainers = function (manifest) {
       const publicVars = manifest['manifest']['vars']
       const varSpec = manifest['manifest']['vars'] && manifest['manifest']['vars'][varName]
       if (!varSpec) {
-        addErrorMessage(
-          errors, varPath,
-          'env variable is not defined within manifest.vars.'
-        )
-
         return
       }
 

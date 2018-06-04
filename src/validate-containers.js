@@ -22,14 +22,16 @@ const validateContainers = function (manifest) {
         )
       }
 
-      // Check if env variable is defined within manifest vars
+      // Check if env variable is defined within manifest.vars
+      const publicVars = manifest['manifest']['vars']
       const varSpec = manifest['manifest']['vars'] && manifest['manifest']['vars'][varName]
       if (!varSpec) {
         addErrorMessage(
           errors, varPath,
           'env variable is not defined within manifest.vars.'
         )
-        return errors
+
+        return
       }
 
       // Check if environment variable with encoding is defined within private manifest
@@ -39,6 +41,17 @@ const validateContainers = function (manifest) {
           addErrorMessage(
             errors, varPath,
             'encoded env variable is not defined within private manifest field'
+          )
+        }
+      }
+
+      // Check for variable in public vars
+      if (environment[varName].startsWith('$')) {
+        const value = environment[varName].substring(1)
+        if (!publicVars[value]) {
+          addErrorMessage(
+            errors, varPath,
+            `environment var is not properly defined. ${varName} !== ${value.substring(1)}`
           )
         }
       }

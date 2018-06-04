@@ -51,7 +51,7 @@ const validateContainers = function (manifest) {
         if (!publicVars[value]) {
           addErrorMessage(
             errors, varPath,
-            `environment var is not properly defined. ${varName} !== ${value.substring(1)}`
+            `environment var is not properly defined manifest.vars}`
           )
         }
       }

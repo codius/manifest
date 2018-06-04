@@ -13,9 +13,10 @@ const validatePublicVars = function (manifest) {
   Object.keys(publicVars).map((varName) => {
     const containers = manifest['manifest']['containers']
     const isUsed = checkUsage(containers, varName)
+    const varPath = `manifest.vars.${varName}`
     if (!isUsed) {
-      addErrorMessage(errors, varName, 'public var defined but never used in ' +
-      `a container environment. var=${varName}`)
+      addErrorMessage(errors, varPath, 'public var defined but never used in ' +
+      `a container environment.`)
     }
   })
 

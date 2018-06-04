@@ -25,10 +25,8 @@ describe('Validate Entire Manifest', function () {
 
     const result = validateManifest(manifest)
     const expected = [
-      { 'manifest.containers[0].environment.CODIUS_VAR':
-      'environment variables starting in `CODIUS` are reserved.' },
-      { 'manifest.name': "schema is invalid. errors=\"{'path':'manifest.name','keyword':" +
-        "'required'}\""}
+      { 'manifest.containers[0].environment.CODIUS_VAR': 'environment variables starting in `CODIUS` are reserved.' },
+      { 'manifest.name': "schema is invalid. errors=\"{'path':'manifest.name','keyword':'required'}\"" }
     ]
     expect(result).to.deep.equal(expected)
   })
@@ -37,9 +35,9 @@ describe('Validate Entire Manifest', function () {
     delete manifest['manifest']['vars']
     const result = validateManifest(manifest)
     const expected = [
-      { AWS_ACCESS_KEY: 'env variable is not defined within manifest vars. var=AWS_ACCESS_KEY' },
-      { AWS_SECRET_KEY: 'env variable is not defined within manifest vars. var=AWS_SECRET_KEY' },
-      { 'manfiest.private': 'cannot validate private vars - manifest.vars is not defined.' }
+      { 'manifest.containers[0].environment.AWS_ACCESS_KEY': 'env variable is not defined within manifest.vars.' },
+      { 'manifest.containers[0].environment.AWS_SECRET_KEY': 'env variable is not defined within manifest.vars.' },
+      { 'private': 'cannot validate private vars - manifest.vars is not defined.' }
     ]
     expect(result).to.deep.equal(expected)
   })

@@ -18,10 +18,9 @@ describe('Validate Private Manifest Variables', function () {
     manifest['manifest']['vars']['AWS_SECRET_KEY']['value'] = 'CODIUS'
 
     const result = validatePrivateVars(manifest, 0)
-    const expected = [{AWS_SECRET_KEY:
-      'private var hash does not match the hashed value. var=AWS_SECRET_KEY ' +
-      'public-hash=CODIUS hashed-value=' +
-      '95b3449d5b13a4e60e5c0218021354c447907d1762bb410ba8d776bfaa1a3faf'
+    const expected = [{ 'private.AWS_SECRET_KEY':
+    'private var hash does not match the hashed value. public-hash=CODIUS ' +
+    'hashed-value=95b3449d5b13a4e60e5c0218021354c447907d1762bb410ba8d776bfaa1a3faf'
     }]
     expect(result).to.deep.equal(expected)
   })
@@ -30,7 +29,7 @@ describe('Validate Private Manifest Variables', function () {
     delete manifest['manifest']['vars']
     const result = validatePrivateVars(manifest)
     expect(result).to.deep.equal([
-      { 'manfiest.private':
+      { 'private':
       'cannot validate private vars - manifest.vars is not defined.' }
     ])
   })
@@ -39,7 +38,7 @@ describe('Validate Private Manifest Variables', function () {
     delete manifest['manifest']['containers'][0]['environment']['AWS_SECRET_KEY']
 
     const result = validatePrivateVars(manifest, 0)
-    const expected = [{ 'manifest.private.AWS_SECRET_KEY':
+    const expected = [{ 'private.AWS_SECRET_KEY':
     'private var is never used within containers'
     }]
     expect(result).to.deep.equal(expected)

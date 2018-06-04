@@ -23,8 +23,9 @@ describe('Validate Public Manifest Variables', function () {
   it('should return errors if public variables are not used in environment', function () {
     delete manifest['manifest']['containers'][0]['environment']['AWS_ACCESS_KEY']
     const result = validatePublicVars(manifest, 0)
-    const expected = [{ AWS_ACCESS_KEY: 'public var defined but never ' +
-      'used in a container environment. var=AWS_ACCESS_KEY' }]
+    const expected = [{ 'manifest.vars.AWS_ACCESS_KEY':
+    'public var defined but never used in a container environment.'
+    }]
     expect(result).to.deep.equal(expected)
   })
 })

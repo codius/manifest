@@ -1,4 +1,5 @@
 // Index.js for Codius Manifest module
-const validateManifest = require('./src/validate-manifest.js').validateManifest
+const { validateManifest } = require('./src/validate-manifest.js')
+const { generateNonce } = require('./src/common/crypto-utils.js')
 
-exports.validateManifest = validateManifest
+module.exports = { validateManifest, generateNonce }

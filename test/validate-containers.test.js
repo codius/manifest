@@ -3,15 +3,18 @@ const testManifest = JSON.stringify(require('./mocks/manifest.test.json'))
 const validateContainers = require('../src/validate-containers.js').validateContainers
 
 describe('Validate Containers in Manifest', function () {
+  let manifest
+
+  beforeEach(function () {
+    manifest = JSON.parse(testManifest)
+  })
+
   it('should not return errors if containers in manifest are valid', function () {
-    let manifest = JSON.parse(testManifest)
     const result = validateContainers(manifest)
     expect(result).to.deep.equal([])
   })
 
   it('should return errors if there are issues with multiple containers', function () {
-    let manifest = JSON.parse(testManifest)
-
     // Insert container with environment variable that starts with `CODIUS`
     manifest['manifest']['containers'].push({
       'id': 'test-app',
@@ -23,7 +26,7 @@ describe('Validate Containers in Manifest', function () {
         'AWS_SECRET_KEY': 'AWS_SECRET_KEY'
       }})
 
-    manifest['manifest']['vars']['CODIUS_HOST'] = 'CODIUS_HOST'
+    manifest['manifest']['vars']['CODIUS_HOST'] = {'value': 'CODIUS_HOST'}
 
     // Insert environment variable without adding it to manifest.vars
     let environment = manifest['manifest']['containers'][0]['environment']
@@ -37,10 +40,9 @@ describe('Validate Containers in Manifest', function () {
   })
 
   it('should return errors if env variable names begin with "CODIUS"', function () {
-    let manifest = JSON.parse(testManifest)
     let environment = manifest['manifest']['containers'][0]['environment']
     environment['CODIUS_VAR'] = '$CODIUS_VAR'
-    manifest['manifest']['vars']['CODIUS_VAR'] = {'value': ''}
+    manifest['manifest']['vars']['CODIUS_VAR'] = {'value': 'CODIUS_VAR'}
     manifest['private']['vars']['CODIUS_VAR'] = {'nonce': '1242352353', 'value': ''}
 
     const result = validateContainers(manifest)
@@ -50,7 +52,6 @@ describe('Validate Containers in Manifest', function () {
   })
 
   it('should return errors if env variable is not defined in manifest.vars', function () {
-    let manifest = JSON.parse(testManifest)
     let environment = manifest['manifest']['containers'][0]['environment']
     environment['ENV_VAR'] = '$ENV_VAR'
 
@@ -61,7 +62,6 @@ describe('Validate Containers in Manifest', function () {
   })
 
   it('should return errors if encoded env variables are not defined in private manifest', function () {
-    let manifest = JSON.parse(testManifest)
     let environment = manifest['manifest']['containers'][0]['environment']
     environment['ENV_VAR'] = '$ENV_VAR'
     manifest['manifest']['vars']['ENV_VAR'] = {

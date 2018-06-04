@@ -3,14 +3,18 @@ const testManifest = JSON.stringify(require('./mocks/manifest.test.json'))
 const validatePrivateVars = require('../src/validate-private-vars.js').validatePrivateVars
 
 describe('Validate Private Manifest Variables', function () {
+  let manifest
+
+  beforeEach(function () {
+    manifest = JSON.parse(testManifest)
+  })
+
   it('should not return errors for valid manifest', function () {
-    let manifest = JSON.parse(testManifest)
     const result = validatePrivateVars(manifest, 0)
     expect(result).to.deep.equal([])
   })
 
   it('should return errors if private variable hashes are inconsistent`', function () {
-    let manifest = JSON.parse(testManifest)
     manifest['manifest']['vars']['AWS_SECRET_KEY']['value'] = 'CODIUS'
 
     const result = validatePrivateVars(manifest, 0)
@@ -23,7 +27,6 @@ describe('Validate Private Manifest Variables', function () {
   })
 
   it('should return errors if public variables are not defined', function () {
-    let manifest = JSON.parse(testManifest)
     delete manifest['manifest']['vars']
     const result = validatePrivateVars(manifest)
     expect(result).to.deep.equal([{
@@ -33,7 +36,6 @@ describe('Validate Private Manifest Variables', function () {
   })
 
   it('should return errors if a private variable is never used in a container', function () {
-    let manifest = JSON.parse(testManifest)
     delete manifest['manifest']['containers'][0]['environment']['AWS_SECRET_KEY']
 
     const result = validatePrivateVars(manifest, 0)

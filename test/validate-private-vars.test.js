@@ -39,7 +39,7 @@ describe('Validate Private Manifest Variables', function () {
 
     const result = validatePrivateVars(manifest, 0)
     const expected = [{ 'private.AWS_SECRET_KEY':
-    'private var is never used within containers'
+    'private var is never used within a container'
     }]
     expect(result).to.deep.equal(expected)
   })

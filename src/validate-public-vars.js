@@ -1,4 +1,5 @@
 const { addErrorMessage } = require('./common/add-error.js')
+const { checkUsage } = require('./common/check-usage.js')
 
 const validatePublicVars = function (manifest) {
   let errors = []
@@ -10,28 +11,18 @@ const validatePublicVars = function (manifest) {
   }
 
   // Check if all public vars are used within the environment
-  Object.keys(publicVars).map((varName) => {
-    const containers = manifest['manifest']['containers']
-    const isUsed = checkUsage(containers, varName)
-    const varPath = `manifest.vars.${varName}`
+  const publicVarKeys = Object.keys(publicVars)
+  publicVarKeys.map((varName) => {
+    const isUsed = checkUsage(manifest, varName)
     if (!isUsed) {
-      addErrorMessage(errors, varPath, 'public var defined but never used in ' +
-      `a container environment.`)
+      addErrorMessage(
+        errors, `manifest.vars.${varName}`,
+        'public var is not used within a container'
+      )
     }
   })
 
   return errors
-}
-
-const checkUsage = function (containers, varName) {
-  // Check if public var is used in a container
-  for (let i = 0; i < containers.length; i++) {
-    const envVars = containers[i]['environment']
-    if (envVars[varName]) {
-      return true
-    }
-  }
-  return false
 }
 
 module.exports = { validatePublicVars }

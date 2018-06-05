@@ -1,5 +1,6 @@
 const { addErrorMessage } = require('./common/add-error.js')
 const { hashPrivateVars } = require('./common/crypto-utils.js')
+const { checkUsage } = require('./common/check-usage.js')
 
 const validatePrivateVars = function (manifest) {
   let errors = []
@@ -9,6 +10,7 @@ const validatePrivateVars = function (manifest) {
   if (!manifest['private']) {
     return errors
   }
+
   // Check if public vars are defined
   if (!publicVars) {
     addErrorMessage(errors, 'private', 'cannot validate private vars' +
@@ -19,7 +21,7 @@ const validatePrivateVars = function (manifest) {
   const privateVarHashes = hashPrivateVars(manifest)
   const privateVarKeys = Object.keys(manifest['private']['vars'])
 
-  // Check if the private variable hashes are consistent
+  // Check if all private vars have consistent hashes and are used in an env
   privateVarKeys.map((varName) => {
     const privateHash = privateVarHashes[varName]
 
@@ -42,52 +44,15 @@ const validatePrivateVars = function (manifest) {
       )
     }
 
-    // Check if private variable is properly defined within container env
-    const containers = manifest['manifest']['containers']
-    errors = errors.concat(checkUsage(containers, varName))
-  })
-  return errors
-}
-
-const checkUsage = function (containers, varName) {
-  let isUsed = false // is var used in a container
-  let errors = []
-
-  // Check if private variable is properly used in a container
-  for (let i = 0; i < containers.length; i++) {
-    const envVars = containers[i]['environment']
-    const value = envVars[varName]
-    const varPath = `manifest.containers[${i}].environment${varName}`
-
-    // Check if private variable is defined in the container
-    if (value) {
-      isUsed = true
-
-      // Check if variable is prefixed with `$` in env definition
-      if (value.startsWith('$')) {
-        if (!(value.substring(1) === varName)) {
-          addErrorMessage(
-            errors, varPath,
-            `environment var is not properly defined. ${varName} !== ${value.substring(1)}`
-          )
-        }
-      } else {
-        addErrorMessage(
-          errors, varPath,
-          'environment var is not properly defined. value must begin with `$`'
-        )
-      }
+    // Check if the private variable is used within a container environment
+    const isUsed = checkUsage(manifest, varName)
+    if (!isUsed) {
+      addErrorMessage(
+        errors, `private.${varName}`,
+        'private var is never used within a container'
+      )
     }
-  }
-
-  // Add error if private variable is never used in a container env
-  if (!isUsed) {
-    addErrorMessage(
-      errors, `private.${varName}`,
-      'private var is never used within containers'
-    )
-  }
-
+  })
   return errors
 }
 

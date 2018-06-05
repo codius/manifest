@@ -11,6 +11,8 @@ const validateContainers = function (manifest) {
   // Validate environment of each container
   for (let i = 0; i < containers.length; i++) {
     const environment = manifest['manifest']['containers'][i]['environment']
+
+    // Error check each environment key
     Object.keys(environment).map((varName) => {
       const varPath = `manifest.containers[${i}].environment.${varName}`
 
@@ -24,11 +26,21 @@ const validateContainers = function (manifest) {
 
       // Check if env variable is defined within manifest.vars
       const publicVars = manifest['manifest']['vars']
-      const varSpec = manifest['manifest']['vars'] && manifest['manifest']['vars'][varName]
+      const varSpec = publicVars && publicVars[varName]
       if (!varSpec) {
-        return
+        const envValue = environment[varName]
+        if (!envValue.startsWith('$')) {
+          return
+        } else {
+          // Environment variable must be defined within manifest.vars if the value
+          // begins with `$`
+          addErrorMessage(
+            errors, varPath,
+            'env variable is not defined within manifest.vars.'
+          )
+          return
+        }
       }
-
       // Check if environment variable with encoding is defined within private manifest
       const privateVarSpec = privateManifest['vars'] && privateManifest['vars'][varName]
       if (varSpec.encoding === 'private:sha256') {
@@ -36,17 +48,6 @@ const validateContainers = function (manifest) {
           addErrorMessage(
             errors, varPath,
             'encoded env variable is not defined within private manifest field'
-          )
-        }
-      }
-
-      // Check for variable in public vars
-      if (environment[varName].startsWith('$')) {
-        const value = environment[varName].substring(1)
-        if (!publicVars[value]) {
-          addErrorMessage(
-            errors, varPath,
-            `environment var is not properly defined manifest.vars}`
           )
         }
       }

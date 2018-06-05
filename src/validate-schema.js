@@ -3,7 +3,7 @@ const jsen = require('jsen')
 const manifestSpec = require('../schemas/ManifestSpec.json')
 
 const validateSchema = function (manifest) {
-  const validate = jsen(manifestSpec)
+  const validate = jsen(manifestSpec, { greedy: true })
   validate(manifest)
   return parseSchemaErrors(validate.errors)
 }

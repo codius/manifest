@@ -23,13 +23,24 @@ describe('Validate Manifest Schema', function () {
     }])
   })
 
-  // TODO: Test for multiple extraneous fields
   it('should return an error if manifest has extraneous fields', function () {
     manifest['manifest']['InvalidField'] = 'This is an invalid field'
     const result = validateSchema(manifest)
     expect(result).to.deep.equal([{
       'manifest': "schema is invalid. errors=\"{'additionalProperties':" +
         "'InvalidField','path':'manifest','keyword':'additionalProperties'}\""
+    }])
+  })
+
+  it('should return an error if the manifest has multiple extraneous fields', function () {
+    manifest['manifest']['InvalidField'] = 'This is an invalid field'
+    manifest['manifest']['InvalidField2'] = 'This is another invalid field'
+    const result = validateSchema(manifest)
+    expect(result).to.deep.equal([{
+      'manifest': "schema is invalid. errors=\"{'additionalProperties':" +
+        "'InvalidField','path':'manifest','keyword':'additionalProperties'}\""},
+    {'manifest': "schema is invalid. errors=\"{'additionalProperties':" +
+          "'InvalidField2','path':'manifest','keyword':'additionalProperties'}\""
     }])
   })
 

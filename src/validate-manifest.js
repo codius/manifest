@@ -5,10 +5,15 @@ const { validateSchema } = require('./validate-schema.js')
 
 const validateManifest = function (manifest) {
   let errors = []
+  const schemaErrors = validateSchema(manifest)
+
+  // Return early if schema errors occur
+  if (schemaErrors.length) {
+    return schemaErrors
+  }
 
   return errors.concat(
     validateContainers(manifest),
-    validateSchema(manifest),
     validatePublicVars(manifest),
     validatePrivateVars(manifest)
   )

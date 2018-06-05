@@ -14,7 +14,19 @@ describe('Validate Entire Manifest', function () {
     expect(result).to.deep.equal([])
   })
 
-  it('should return errors if both schema and spec errors occur', function () {
+  it('should return proper errors if spec errors occur', function () {
+    // Spec error: env variable name should not begin with `CODIUS`
+    let environment = manifest['manifest']['containers'][0]['environment']
+    environment['CODIUS_VAR'] = '$CODIUS_VAR'
+    manifest['manifest']['vars']['CODIUS_VAR'] = {'value': ''}
+    const result = validateManifest(manifest)
+    const expected = [
+      { 'manifest.containers[0].environment.CODIUS_VAR': 'environment variables starting in `CODIUS` are reserved.' }
+    ]
+    expect(result).to.deep.equal(expected)
+  })
+
+  it('should only return schema errors if both schema and spec errors occur', function () {
     // Schema error: the required name value is not included in manifest
     delete manifest['manifest']['name']
 
@@ -25,7 +37,6 @@ describe('Validate Entire Manifest', function () {
 
     const result = validateManifest(manifest)
     const expected = [
-      { 'manifest.containers[0].environment.CODIUS_VAR': 'environment variables starting in `CODIUS` are reserved.' },
       { 'manifest.name': "schema is invalid. errors=\"{'path':'manifest.name','keyword':'required'}\"" }
     ]
     expect(result).to.deep.equal(expected)

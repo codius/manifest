@@ -40,8 +40,9 @@ const validateContainers = function (manifest) {
         return
       }
 
-      // Check env variable is specified in manfiest.vars
       envValue = envValue.substring(1) // remove $ from env value
+
+      // Check env variable is specified in manfiest.vars
       if (!publicVars[envValue]) {
         // Environment variable must be defined within manifest.vars if the value
         // begins with `$`

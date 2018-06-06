@@ -13,8 +13,9 @@ const parseSchemaErrors = function (errorList) {
 
   for (let i = 0; i < errorList.length; i++) {
     const error = errorList[i]
-    const errorfmt = (JSON.stringify(error)).replace(/"/g, "'")
-    addErrorMessage(errors, error['path'], `schema is invalid. errors=${JSON.stringify(errorfmt)}`)
+    let errorfmt = (JSON.stringify(error)).replace(/"/g, "'")
+
+    addErrorMessage(errors, error['path'], `schema is invalid. error=${errorfmt}`)
   }
   return errors
 }

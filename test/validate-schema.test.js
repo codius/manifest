@@ -18,8 +18,8 @@ describe('Validate Manifest Schema', function () {
     delete manifest['manifest']['name']
     const result = validateSchema(manifest)
     expect(result).to.deep.equal([{
-      'manifest.name': "schema is invalid. errors=\"{'path':'manifest.name'," +
-        "'keyword':'required'}\""
+      'manifest.name': "schema is invalid. error={'path':'manifest.name'," +
+        "'keyword':'required'}"
     }])
   })
 
@@ -27,8 +27,8 @@ describe('Validate Manifest Schema', function () {
     manifest['manifest']['InvalidField'] = 'This is an invalid field'
     const result = validateSchema(manifest)
     expect(result).to.deep.equal([{
-      'manifest': "schema is invalid. errors=\"{'additionalProperties':" +
-        "'InvalidField','path':'manifest','keyword':'additionalProperties'}\""
+      'manifest': "schema is invalid. error={'additionalProperties':" +
+        "'InvalidField','path':'manifest','keyword':'additionalProperties'}"
     }])
   })
 
@@ -37,10 +37,10 @@ describe('Validate Manifest Schema', function () {
     manifest['manifest']['InvalidField2'] = 'This is another invalid field'
     const result = validateSchema(manifest)
     expect(result).to.deep.equal([{
-      'manifest': "schema is invalid. errors=\"{'additionalProperties':" +
-        "'InvalidField','path':'manifest','keyword':'additionalProperties'}\""},
-    {'manifest': "schema is invalid. errors=\"{'additionalProperties':" +
-          "'InvalidField2','path':'manifest','keyword':'additionalProperties'}\""
+      'manifest': "schema is invalid. error={'additionalProperties':" +
+        "'InvalidField','path':'manifest','keyword':'additionalProperties'}"},
+    {'manifest': "schema is invalid. error={'additionalProperties':" +
+          "'InvalidField2','path':'manifest','keyword':'additionalProperties'}"
     }])
   })
 
@@ -48,8 +48,8 @@ describe('Validate Manifest Schema', function () {
     manifest['manifest']['name'] = 5
     const result = validateSchema(manifest)
     expect(result).to.deep.equal([{
-      'manifest.name': "schema is invalid. errors=\"{'path':'manifest.name'," +
-      "'keyword':'type'}\""
+      'manifest.name': "schema is invalid. error={'path':'manifest.name'," +
+      "'keyword':'type'}"
     }])
   })
 })

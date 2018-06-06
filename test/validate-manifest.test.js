@@ -37,7 +37,7 @@ describe('Validate Entire Manifest', function () {
 
     const result = validateManifest(manifest)
     const expected = [
-      { 'manifest.name': "schema is invalid. errors=\"{'path':'manifest.name','keyword':'required'}\"" }
+      { 'manifest.name': "schema is invalid. error={'path':'manifest.name','keyword':'required'}" }
     ]
     expect(result).to.deep.equal(expected)
   })

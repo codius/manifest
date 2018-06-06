@@ -177,4 +177,5 @@ generateNonces('./manifest.json')
 ```
 
 ## License
+
 Apache-2.0

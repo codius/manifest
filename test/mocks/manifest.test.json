@@ -1,0 +1,34 @@
+{
+  "manifest": {
+    "name": "my-codius-pod",
+    "version": "1.0.0",
+    "machine": "small",
+    "containers": [{
+      "id": "app",
+      "image": "hello-world@sha256:f5233545e43561214ca4891fd1157e1c3c563316ed8e237750d59bde73361e77",
+      "command": ["/bin/sh"],
+      "workdir": "/root",
+      "environment": {
+        "AWS_ACCESS_KEY": "$AWS_ACCESS_KEY",
+        "AWS_SECRET_KEY": "$AWS_SECRET_KEY"
+      }
+    }],
+    "vars": {
+      "AWS_ACCESS_KEY": {
+        "value": "AKRTP2SB9AF5TQQ1N1BB"
+      },
+      "AWS_SECRET_KEY": {
+        "encoding": "private:sha256",
+        "value": "95b3449d5b13a4e60e5c0218021354c447907d1762bb410ba8d776bfaa1a3faf"
+      }
+    }
+  },
+  "private": {
+    "vars": {
+      "AWS_SECRET_KEY": {
+        "nonce": "123450325",
+        "value": "AKRTP2SB9AF5TQQ1N1BC"
+      }
+    }
+  }
+}

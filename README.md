@@ -91,7 +91,7 @@ The Codius manifest module exports the following functions to configure and vali
  ```
 
 ### `validateManifest(manifest)`
-Validates the manifest against the manifest schema.
+Validates the manifest against the standard manifest schema.
 
 Arguments:
 * `manifest`
@@ -110,7 +110,7 @@ For example:
  ]
 ```
 
-### `generateNonce()``
+### `generateNonce()`
 Generates the nonce for the hash of the private variable object in the manifest.
  The function returns a string representing the 16 byte nonce in `hex`.
 
@@ -126,7 +126,7 @@ Arguments:
 The function returns the `sha256` manifest hash with `base32` encoding.
 
 ### `hashPrivateVars(manifest)`
-Generates the hashes of the private variable objects in the manifest
+Generates the hashes of the private variable objects in the manifest.
 
 Arguments:
 * `manifest`

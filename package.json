@@ -31,13 +31,13 @@
     "nyc": "^11.8.0",
     "sinon": "^5.0.10"
   },
-
   "dependencies": {
     "boom": "^7.2.0",
     "canonical-json": "0.0.4",
     "crypto": "^1.0.1",
     "debug": "^3.1.0",
-    "jsen": "^0.6.6"
+    "jsen": "^0.6.6",
+    "thirty-two": "^1.0.2"
   },
   "nyc": {
     "check-coverage": true,

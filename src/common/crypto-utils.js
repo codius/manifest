@@ -1,9 +1,10 @@
-const crypto = require('crypto')
 const canonicalJson = require('canonical-json')
+const { createHash, randomBytes } = require('crypto')
+const { encode } = require('../common/base32.js')
 
 const generateNonce = function () {
   // Generates 16 byte nonce
-  const buf = crypto.randomBytes(16)
+  const buf = randomBytes(16)
   return buf.toString('hex')
 }
 
@@ -12,7 +13,7 @@ const hashPrivateVars = function (manifest) {
   const privateVarHashes = {}
 
   Object.keys(privateVars).map((key) => {
-    privateVarHashes[key] = crypto.createHash('sha256')
+    privateVarHashes[key] = createHash('sha256')
       .update(canonicalJson(privateVars[key]))
       .digest('hex')
     return key
@@ -20,4 +21,16 @@ const hashPrivateVars = function (manifest) {
   return privateVarHashes
 }
 
-module.exports = { generateNonce, hashPrivateVars }
+const hashManifest = function (manifest) {
+  const hashed = createHash('sha256')
+    .update(canonicalJson(manifest), 'utf8')
+    .digest()
+
+  return encode(hashed)
+}
+
+module.exports = {
+  generateNonce,
+  hashManifest,
+  hashPrivateVars
+}

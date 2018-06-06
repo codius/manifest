@@ -24,26 +24,38 @@ const validateContainers = function (manifest) {
         )
       }
 
-      // Check if env variable is defined within manifest.vars
+      // Check if public vars are defined
       const publicVars = manifest['manifest']['vars']
-      const varSpec = publicVars && publicVars[varName]
-      if (!varSpec) {
-        const envValue = environment[varName]
-        if (!envValue.startsWith('$')) {
-          return
-        } else {
-          // Environment variable must be defined within manifest.vars if the value
-          // begins with `$`
-          addErrorMessage(
-            errors, varPath,
-            'env variable is not defined within manifest.vars.'
-          )
-          return
-        }
+      if (!publicVars) {
+        addErrorMessage(
+          errors, `${varPath}`,
+          'cannot validate env varaible - manifest.vars not defined'
+        )
+        return
       }
+
+      // Skip additional validation steps for environment variables set to literals
+      let envValue = environment[varName]
+      if (!envValue.startsWith('$')) {
+        return
+      }
+
+      // Check env variable is specified in manfiest.vars
+      envValue = envValue.substring(1) // remove $ from env value
+      if (!publicVars[envValue]) {
+        // Environment variable must be defined within manifest.vars if the value
+        // begins with `$`
+        addErrorMessage(
+          errors, varPath,
+          'env variable is not defined within manifest.vars.'
+        )
+        return
+      }
+
       // Check if environment variable with encoding is defined within private manifest
-      const privateVarSpec = privateManifest['vars'] && privateManifest['vars'][varName]
-      if (varSpec.encoding === 'private:sha256') {
+      const encoding = publicVars[envValue]['encoding']
+      const privateVarSpec = privateManifest['vars'] && privateManifest['vars'][envValue]
+      if (encoding === 'private:sha256') {
         if (!privateVarSpec) {
           addErrorMessage(
             errors, varPath,

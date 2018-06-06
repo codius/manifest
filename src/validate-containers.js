@@ -24,19 +24,19 @@ const validateContainers = function (manifest) {
         )
       }
 
+      // Skip additional validation steps for environment variables set to literals
+      let envValue = environment[varName]
+      if (!envValue.startsWith('$')) {
+        return
+      }
+
       // Check if public vars are defined
       const publicVars = manifest['manifest']['vars']
       if (!publicVars) {
         addErrorMessage(
           errors, `${varPath}`,
-          'cannot validate env varaible - manifest.vars not defined'
+          'cannot validate env variable - manifest.vars not defined'
         )
-        return
-      }
-
-      // Skip additional validation steps for environment variables set to literals
-      let envValue = environment[varName]
-      if (!envValue.startsWith('$')) {
         return
       }
 
@@ -63,6 +63,9 @@ const validateContainers = function (manifest) {
             'encoded env variable is not defined within private manifest field'
           )
         }
+      } else if (encoding) {
+        // add error if encoding id defined but not equal to private:sha256
+        addErrorMessage(errors, `manifest.vars.${envValue}`, 'invalid encoding')
       }
     })
   }

@@ -46,8 +46,8 @@ describe('Validate Entire Manifest', function () {
     delete manifest['manifest']['vars']
     const result = validateManifest(manifest)
     const expected = [
-      { 'manifest.containers[0].environment.AWS_ACCESS_KEY': 'cannot validate env varaible - manifest.vars not defined' },
-      { 'manifest.containers[0].environment.AWS_SECRET_KEY': 'cannot validate env varaible - manifest.vars not defined' },
+      { 'manifest.containers[0].environment.AWS_ACCESS_KEY': 'cannot validate env variable - manifest.vars not defined' },
+      { 'manifest.containers[0].environment.AWS_SECRET_KEY': 'cannot validate env variable - manifest.vars not defined' },
       { 'private': 'cannot validate private vars - manifest.vars is not defined.' }
     ]
     expect(result).to.deep.equal(expected)

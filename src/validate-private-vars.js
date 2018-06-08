@@ -54,7 +54,8 @@ const validatePrivateVars = function (manifest) {
       )
     }
   })
-  debug(`private variable errors: ${JSON.stringify(errors)}`)
+  debug('private variable errors:')
+  debug(errors)
   return errors
 }
 

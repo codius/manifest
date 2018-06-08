@@ -1,5 +1,6 @@
 const { addErrorMessage } = require('./common/add-error.js')
 const { checkUsage } = require('./common/check-usage.js')
+const debug = require('debug')('codius-manifest:validate-publicvars')
 
 const validatePublicVars = function (manifest) {
   let errors = []
@@ -9,7 +10,7 @@ const validatePublicVars = function (manifest) {
   if (!publicVars) {
     return errors
   }
-
+  debug('validating public variables...')
   // Check if all public vars are used within the environment
   const publicVarKeys = Object.keys(publicVars)
   publicVarKeys.map((varName) => {
@@ -21,6 +22,8 @@ const validatePublicVars = function (manifest) {
       )
     }
   })
+  debug('public variable errors:')
+  debug(errors)
 
   return errors
 }

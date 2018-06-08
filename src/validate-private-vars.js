@@ -1,6 +1,7 @@
 const { addErrorMessage } = require('./common/add-error.js')
 const { hashPrivateVars } = require('./common/crypto-utils.js')
 const { checkUsage } = require('./common/check-usage.js')
+const debug = require('debug')('codius-manifest:validate-privatevars')
 
 const validatePrivateVars = function (manifest) {
   let errors = []
@@ -10,7 +11,7 @@ const validatePrivateVars = function (manifest) {
   if (!manifest['private']) {
     return errors
   }
-
+  debug('validating private variables...')
   // Check if public vars are defined
   if (!publicVars) {
     addErrorMessage(errors, 'private', 'cannot validate private vars' +
@@ -24,13 +25,13 @@ const validatePrivateVars = function (manifest) {
   // Check if all private vars have consistent hashes and are used in an env
   privateVarKeys.map((varName) => {
     const privateHash = privateVarHashes[varName]
-
     // Return error if the corresponding public var is defined
     if (!publicVars[varName]) {
       addErrorMessage(
         errors, `private.${varName}`,
         'private var is not specified within manifest.vars'
       )
+      return
     }
 
     // Check if public value is consistent with private hash
@@ -53,6 +54,7 @@ const validatePrivateVars = function (manifest) {
       )
     }
   })
+  debug(`private variable errors: ${JSON.stringify(errors)}`)
   return errors
 }
 

@@ -1,4 +1,5 @@
 const { addErrorMessage } = require('./common/add-error.js')
+const debug = require('debug')('codius-manifest:validate-containers')
 
 const validateContainers = function (manifest) {
   let errors = []
@@ -7,11 +8,12 @@ const validateContainers = function (manifest) {
 
   // Check if container ids are unique
   errors = errors.concat(checkIds(containers))
-
+  debug('validating containers...')
   // Validate environment of each container
   for (let i = 0; i < containers.length; i++) {
     const environment = manifest['manifest']['containers'][i]['environment']
-
+    debug('environment:')
+    debug(environment)
     // Error check each environment key
     Object.keys(environment).map((varName) => {
       const varPath = `manifest.containers[${i}].environment.${varName}`
@@ -69,6 +71,8 @@ const validateContainers = function (manifest) {
       }
     })
   }
+  debug('container validation errors:')
+  debug(errors)
   return errors
 }
 

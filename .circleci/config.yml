@@ -80,7 +80,7 @@ workflows:
       - build_node_v8
       - publish_to_npm:
           requires:
-            - build
+            - build_node_v10
           filters:
             branches:
               only:

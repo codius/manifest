@@ -4,6 +4,7 @@ const debug = require('debug')('codius-manifest:generate-manifest')
 const fse = require('fs-extra')
 const { hashPrivateVars } = require('./common/crypto-utils.js')
 const jsen = require('jsen')
+const { validateGeneratedManifest } = require('./validate-generated-manifest.js')
 
 const generateManifest = async function (codiusVarsPath, codiusPath) {
   const codiusVars = await fse.readJson(codiusVarsPath)
@@ -57,7 +58,14 @@ const generateManifest = async function (codiusVarsPath, codiusPath) {
   }
 
   removeDescriptions(generatedManifest) // remove description fields from manifest
-  debug(`Complete Manifest: ${JSON.stringify(generatedManifest, null, 2)}`)
+  debug(`Generated Manifest: ${JSON.stringify(generatedManifest, null, 2)}`)
+
+  // check if the generated manifest is valid
+  const errors = validateGeneratedManifest(generatedManifest)
+  if (errors.length > 0) {
+    throw new Error(`Generated manifest is invalid. errors:
+      ${JSON.stringify(errors, null, 2)}`)
+  }
   return generatedManifest
 }
 

@@ -73,4 +73,13 @@ describe('Generate Complete Manifest', function () {
     const result = generateCompleteManifest(varsMock, manifestMock)
     return expect(result).to.eventually.become(validManifest)
   })
+
+  it('should remove all description fields from the final manifest', async function () {
+    const manifest = JSON.parse(JSON.stringify(manifestJson))
+    manifest['manifest']['vars']['AWS_SECRET_KEY']['description'] = 'An AWS secret key'
+    manifest['manifest']['vars']['AWS_ACCESS_KEY']['description'] = 'An AWS access key'
+    await fse.writeJson(manifestMock, manifest)
+    const result = generateCompleteManifest(varsMock, manifestMock)
+    return expect(result).to.eventually.become(validManifest)
+  })
 })

@@ -55,6 +55,8 @@ const generateCompleteManifest = async function (codiusVars, codiusManifest) {
     })
     checkPrivateVarEncodings(completeManifest)
   }
+
+  removeDescriptions(completeManifest) // remove description fields from manifest
   debug(`Complete Manifest: ${JSON.stringify(completeManifest, null, 2)}`)
   return completeManifest
 }
@@ -87,6 +89,20 @@ const checkPrivateVarEncodings = function (manifest) {
   return manifest
 }
 
+const removeDescriptions = function (manifest) {
+  // Remove description fields from a manifest
+  const publicVars = manifest['manifest']['vars']
+  if (publicVars) {
+    const publicVarKeys = Object.keys(publicVars)
+    publicVarKeys.map((varName) => {
+      const publicVar = publicVars[varName]
+      if (publicVar['description']) {
+        delete publicVar['description']
+      }
+    })
+  }
+  return manifest
+}
 module.exports = {
   generateCompleteManifest
 }

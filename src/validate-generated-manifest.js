@@ -11,12 +11,12 @@ const validateGeneratedManifest = function (manifest) {
 
   // Return early if schema errors occur
   if (schemaErrors.length) {
-    debug(`validation failed due to the following schema errors: 
+    debug(`validation failed due to the following schema errors:
       ${JSON.stringify(errors, null, 2)}`)
     return schemaErrors
   }
 
-  errors.concat(
+  errors = errors.concat(
     validateContainers(manifest),
     validatePublicVars(manifest),
     validatePrivateVars(manifest)

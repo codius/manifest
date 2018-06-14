@@ -71,8 +71,7 @@ const validateContainers = function (manifest) {
       }
     })
   }
-  debug('container validation errors:')
-  debug(errors)
+  debug(`container validation errors: ${JSON.stringify(errors, null, 2)}`)
   return errors
 }
 

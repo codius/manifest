@@ -1,52 +1,21 @@
-# Codius Manifest Format
+# Codius Manifest
 
 [Codius](https://codius.org) is an open-source decentralized hosting platform using [Interledger](https://interledger.org). It allows anyone to run software on servers all over the world and pay using any currency. Users package their software inside of [containers](https://www.docker.com/what-container). Multiple containers can run together inside of a [pod](https://kubernetes.io/docs/concepts/workloads/pods/pod/).
 
-**Codius Manifest** (this repository) is a module for validating and configuring Codius manifests.
+**Codius Manifest** (this repository) is a module for validating and generating Codius manifests.
 The Codius manifest format allows users to specify container images, public and
 private environment variables, and other information about pods. Manifests are used
 by [Codius hosts](https://github.com/codius/codiusd) to setup the container environments and download images.
 
-## Manifest Example
-Manifests must match the standard format, which is specified [here](https://github.com/codius/manifest/blob/master/src/schemas/ManifestSpec.json).
-```json
-{
-  "name": "test-app",
-  "version": "1.0.0",
-  "machine": "small",
-  "port": "8080",
-  "containers": [{
-    "id": "app",
-    "image": "hello-world@sha256:f5233545e43561214ca4891fd1157e1c3c563316ed8e237750d59bde73361e77",
-    "command": ["/bin/sh"],
-    "workdir": "/root",
-    "environment": {
-      "AWS_ACCESS_KEY": "$AWS_ACCESS_KEY",
-      "AWS_SECRET_KEY": "$AWS_SECRET_KEY"
-    }
-  }],
-  "vars": {
-    "AWS_ACCESS_KEY": {
-      "value": "AKRTP2SB9AF5TQQ1N1BB"
-    },
-    "AWS_SECRET_KEY": {
-      "encoding": "private:sha256",
-      "value": "d429d080fa3a4629afb7d0759640b60f8ac70b377c72c048cdff9e5ef73dd6c2"
-    }
-  }
-}
-```
-
-## Full Codius Request Body
-The full Codius request body may include private variables that should not be exposed publicly by the host.
-
+## Manifest Format
+Manifests must match the standard format, which is specified [here](https://github.com/codius/manifest/blob/master/src/schemas/GeneratedManifestSpec.json).
+Manifests that are valid against the standard schema are considered complete.
 ```json
 {
   "manifest": {
-    "name": "test-app",
+    "name": "my-codius-pod",
     "version": "1.0.0",
     "machine": "small",
-    "port": "8080",
     "containers": [{
       "id": "app",
       "image": "hello-world@sha256:f5233545e43561214ca4891fd1157e1c3c563316ed8e237750d59bde73361e77",
@@ -63,14 +32,14 @@ The full Codius request body may include private variables that should not be ex
       },
       "AWS_SECRET_KEY": {
         "encoding": "private:sha256",
-        "value": "aa965f3036ee2e6496cd961d9ed75626bc600ff1636b8cd909974dae2eb19208"
+        "value": "95b3449d5b13a4e60e5c0218021354c447907d1762bb410ba8d776bfaa1a3faf"
       }
     }
   },
   "private": {
     "vars": {
       "AWS_SECRET_KEY": {
-        "nonce": "1234530325",
+        "nonce": "123450325",
         "value": "AKRTP2SB9AF5TQQ1N1BC"
       }
     }
@@ -78,20 +47,74 @@ The full Codius request body may include private variables that should not be ex
 }
 ```
 
-# Reference
-
-The Codius manifest module exports the following functions to configure and validate manifests.
-
+## Codius Files
+Manifests are generated from two files: `codius.json` and `codiusvars.json`.
+### `codius.json`
+This file includes details about the pod to be uploaded . Unlike the generated manifest, `codius.json`
+may contain description fields for public variables. The official specification can be found
+[here](https://github.com/codius/manifest/blob/master/src/schemas/CodiusSpec.json).
+```json
+{
+  "manifest": {
+    "name": "my-codius-pod",
+    "version": "1.0.0",
+    "machine": "small",
+    "containers": [{
+      "id": "app",
+      "image": "hello-world@sha256:f5233545e43561214ca4891fd1157e1c3c563316ed8e237750d59bde73361e77",
+      "command": ["/bin/sh"],
+      "workdir": "/root",
+      "environment": {
+        "AWS_ACCESS_KEY": "$AWS_ACCESS_KEY",
+        "AWS_SECRET_KEY": "$AWS_SECRET_KEY"
+      }
+    }],
+    "vars": {
+      "AWS_ACCESS_KEY": {
+        "value": "AKRTP2SB9AF5TQQ1N1BB"
+      },
+      "AWS_SECRET_KEY": {
+        "encoding": "private:sha256",
+        "value": "95b3449d5b13a4e60e5c0218021354c447907d1762bb410ba8d776bfaa1a3faf"
+      }
+    }
+  }
+}
 ```
-  validateManifest(manifest)
-  generateNonce()
-  hashManifest(manifest)
-  hashPrivateVars(manifest)
 
+### `codiusvars.json`
+This file defines the public and private variables to be included in the
+generated manifest. Similar to `codius.json`, this file may include description
+fields for the public variables. The official specification can be found
+[here](https://github.com/codius/manifest/blob/master/src/schemas/CodiusVarsSpec.json).
+```json
+{
+  "vars": {
+    "public": {
+      "AWS_ACCESS_KEY": {
+        "value": "AKRTP2SB9AF5TQQ1N1BB",
+        "description": "My AWS access key"
+      }
+    },
+    "private": {
+      "AWS_SECRET_KEY": {
+        "nonce": "123450325",
+        "value": "AKRTP2SB9AF5TQQ1N1BC"
+      }
+    }
+  }
+}
+```
+# Reference
+The Codius manifest module exports the following functions to validate and generate manifests.
+```
+  validateGeneratedManifest(manifest)
+  generateManifest(codiusVarsPath, codiusPath)
+  hashManifest(manifest)
  ```
 
-### `validateManifest(manifest)`
-Validates the manifest against the standard manifest schema.
+### `validateGeneratedManifest(manifest)`
+Validates a generated manifest against the standard manifest schema.
 
 Arguments:
 * `manifest`
@@ -110,13 +133,22 @@ For example:
  ]
 ```
 
-### `generateNonce()`
-Generates the nonce for the hash of the private variable object in the manifest.
- The function returns a string representing the 16 byte nonce in `hex`.
+### `generateManifest(codiusVarsPath, codiusPath)`
+Generates a manifest from `codiusvars.json` and `codius.json`. An error will be
+thrown if the generated manifest is invalid.
 
+Arguments:
+* `codiusVarsPath`
+  * Type: string
+  * Description: the path to a `codiusvars.json` file
+* `codiusPath`
+  * Type: string
+  * Description: the path to a `codius.json` file
+
+The function returns a JSON object representing the generated manifest.
 
 ### `hashManifest(manifest)`
-Generates the hash of a Codius manifest.
+Generates the hash of a complete Codius manifest.
 
 Arguments:
 * `manifest`
@@ -125,55 +157,27 @@ Arguments:
 
 The function returns the `sha256` manifest hash with `base32` encoding.
 
-### `hashPrivateVars(manifest)`
-Generates the hashes of the private variable objects in the manifest.
-
-Arguments:
-* `manifest`
-  * Type: JSON
-  * Description: a manifest with private variables
-
-The function returns an object of the form `{ <varName>: <hash> ... }`.
-The private variable hashes are generated using `sha256` and are encoded in `hex`.
-
 ## Usage
-The module can be used to easily validate and configure manifest files.
+The module can be used to easily generate manifest files.
 ```js
+const { generateManifest, hashManifest } = require('codius-manifest')
 
-const validate = require('codius-manifest')
-const fse = require('fs-extra')
-
-async function generateNonces(manifestPath) {
-  let manifest = await fse.readJson(manifestPath)
-
-  // check if manifest is valid
-  console.log('validating manifest...')
-  const errors = validate.validateManifest(manifest)
-  if (errors.length) {
-    errors.forEach((error) => {
-      console.log(JSON.stringify(error))
-    })
-    throw new Error('Manifest is invalid')
-  }
-
-  // Generate new nonces for private variables
-  console.log('generating new private var nonces ...')
-  let privateVars = Object.keys(manifest.private.vars)
-  privateVars.map((varName) => {
-    manifest.private.vars[varName].nonce = validate.generateNonce()
-  })
+async function generateManifestHash (codiusVarsPath, codiusPath) {
+  // generate new manifest
+  const generatedManifest = await generateManifest(codiusVarsPath, codiusPath)
+  console.log(`New Manifest: ${JSON.stringify(generatedManifest, null, 2)}`)
 
   // generate manifest hash
-  const manifestHash = validate.hashManifest(manifest)
+  const manifestHash = hashManifest(generatedManifest)
   console.log(`New Manifest Hash: ${manifestHash}`)
-
-  // generate new private var hashes
-  console.log('generating private var hashes...')
-  const hashes = validate.hashPrivateVars(manifest)
-  console.log(`private var hashes: ${JSON.stringify(hashes)}`)
+  return manifestHash
 }
 
-generateNonces('./manifest.json')
+const codiusVarsPath = './codiusvars.json'
+const codiusPath = './codius.json'
+generateManifestHash(codiusVarsPath, codiusPath)
+  .then(() => { console.log('Success!') })
+  .catch(error => { console.log(error) })
 ```
 
 ## License

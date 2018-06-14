@@ -4,7 +4,7 @@ const { expect } = chai
 chai.use(chaiAsPromised)
 const fse = require('fs-extra')
 const { after, beforeEach, describe, it } = require('mocha')
-const { generateCompleteManifest } = require('../src/generate-complete-manifest.js')
+const { generateManifest } = require('../src/generate-manifest.js')
 const validManifest = require('./mocks/manifest.test.json')
 const varsStatic = './test/mocks/codiusvars.test.json'
 const varsMock = './test/codiusvars.mock.json'
@@ -27,7 +27,7 @@ describe('Generate Complete Manifest', function () {
   })
 
   it('should return the correct manifest when given valid codius files', async function () {
-    const result = await generateCompleteManifest(varsStatic, manifestStatic)
+    const result = await generateManifest(varsStatic, manifestStatic)
     expect(result).to.deep.equal(validManifest)
   })
 
@@ -35,7 +35,7 @@ describe('Generate Complete Manifest', function () {
     const manifest = JSON.parse(JSON.stringify(manifestJson))
     delete manifest['manifest']['name']
     await fse.writeJson(manifestMock, manifest)
-    const result = generateCompleteManifest(varsMock, manifestMock)
+    const result = generateManifest(varsMock, manifestMock)
     return expect(result).to.be.rejected
   })
 
@@ -43,7 +43,7 @@ describe('Generate Complete Manifest', function () {
     const vars = JSON.parse(JSON.stringify(manifestJson))
     delete vars['vars']
     await fse.writeJson(varsMock, vars)
-    const result = generateCompleteManifest(varsMock, manifestMock)
+    const result = generateManifest(varsMock, manifestMock)
     return expect(result).to.be.rejected
   })
 
@@ -51,7 +51,7 @@ describe('Generate Complete Manifest', function () {
     const manifest = JSON.parse(JSON.stringify(manifestJson))
     manifest['manifest']['vars']['AWS_ACCESS_KEY'] = { value: 'ABSCEDADFSDSF' }
     await fse.writeJson(manifestMock, manifest)
-    const result = generateCompleteManifest(varsMock, manifestMock)
+    const result = generateManifest(varsMock, manifestMock)
     return expect(result).to.eventually.become(validManifest)
   })
 
@@ -59,7 +59,7 @@ describe('Generate Complete Manifest', function () {
     const manifest = JSON.parse(JSON.stringify(manifestJson))
     delete manifest['manifest']['vars']['AWS_SECRET_KEY']
     await fse.writeJson(manifestMock, manifest)
-    const result = generateCompleteManifest(varsMock, manifestMock)
+    const result = generateManifest(varsMock, manifestMock)
     return expect(result).to.eventually.become(validManifest)
   })
 
@@ -70,7 +70,7 @@ describe('Generate Complete Manifest', function () {
       'value': 'thisaninvalidhash'
     }
     await fse.writeJson(manifestMock, manifest)
-    const result = generateCompleteManifest(varsMock, manifestMock)
+    const result = generateManifest(varsMock, manifestMock)
     return expect(result).to.eventually.become(validManifest)
   })
 
@@ -79,7 +79,7 @@ describe('Generate Complete Manifest', function () {
     manifest['manifest']['vars']['AWS_SECRET_KEY']['description'] = 'An AWS secret key'
     manifest['manifest']['vars']['AWS_ACCESS_KEY']['description'] = 'An AWS access key'
     await fse.writeJson(manifestMock, manifest)
-    const result = generateCompleteManifest(varsMock, manifestMock)
+    const result = generateManifest(varsMock, manifestMock)
     return expect(result).to.eventually.become(validManifest)
   })
 })

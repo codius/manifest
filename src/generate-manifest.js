@@ -1,11 +1,11 @@
 const codiusSchema = require('../schemas/CodiusSpec.json')
 const varsSchema = require('../schemas/CodiusVarsSpec.json')
-const debug = require('debug')('codius-manifest:generate-complete-manifest')
+const debug = require('debug')('codius-manifest:generate-manifest')
 const fse = require('fs-extra')
 const { hashPrivateVars } = require('./common/crypto-utils.js')
 const jsen = require('jsen')
 
-const generateCompleteManifest = async function (codiusVarsPath, codiusPath) {
+const generateManifest = async function (codiusVarsPath, codiusPath) {
   const codiusVars = await fse.readJson(codiusVarsPath)
   const codius = await fse.readJson(codiusPath)
   const validateCodiusFile = jsen(codiusSchema, { greedy: true })
@@ -31,43 +31,43 @@ const generateCompleteManifest = async function (codiusVarsPath, codiusPath) {
 
   // Generate a complete Codius manifest
   debug('generating compelete manifest...')
-  const completeManifest = { manifest: codius['manifest'] }
+  const generatedManifest = { manifest: codius['manifest'] }
 
   // Update public vars in the final manifest
   const publicVars = codiusVars['vars']['public']
   if (publicVars) {
-    if (!completeManifest['manifest']['vars']) {
-      completeManifest['manifest']['vars'] = publicVars
+    if (!generatedManifest['manifest']['vars']) {
+      generatedManifest['manifest']['vars'] = publicVars
     }
     const publicVarKeys = Object.keys(publicVars)
     publicVarKeys.map((varName) => {
-      completeManifest['manifest']['vars'][varName] = publicVars[varName]
+      generatedManifest['manifest']['vars'][varName] = publicVars[varName]
     })
   }
 
   // Update private vars in the final manifest
   const privateVars = codiusVars['vars']['private']
   if (privateVars) {
-    completeManifest['private'] = { vars: privateVars }
+    generatedManifest['private'] = { vars: privateVars }
     const privateVarKeys = Object.keys(privateVars)
     privateVarKeys.map((varName) => {
-      completeManifest['private']['vars'][varName] = privateVars[varName]
+      generatedManifest['private']['vars'][varName] = privateVars[varName]
     })
-    checkPrivateVarEncodings(completeManifest)
+    checkPrivateVarEncodings(generatedManifest)
   }
 
-  removeDescriptions(completeManifest) // remove description fields from manifest
-  debug(`Complete Manifest: ${JSON.stringify(completeManifest, null, 2)}`)
-  return completeManifest
+  removeDescriptions(generatedManifest) // remove description fields from manifest
+  debug(`Complete Manifest: ${JSON.stringify(generatedManifest, null, 2)}`)
+  return generatedManifest
 }
 
-const checkPrivateVarEncodings = function (completeManifest) {
-  const publicVars = completeManifest['manifest']['vars']
+const checkPrivateVarEncodings = function (generatedManifest) {
+  const publicVars = generatedManifest['manifest']['vars']
   if (!publicVars) {
-    completeManifest['manifest']['vars'] = {}
+    generatedManifest['manifest']['vars'] = {}
   }
 
-  const privateVarHashes = hashPrivateVars(completeManifest)
+  const privateVarHashes = hashPrivateVars(generatedManifest)
   const privateVarKeys = Object.keys(privateVarHashes)
   privateVarKeys.map((varName) => {
     const encoding = {
@@ -86,12 +86,12 @@ const checkPrivateVarEncodings = function (completeManifest) {
       debug(`New encoding for ${varName}: ${JSON.stringify(publicEncoding, null, 2)}`)
     }
   })
-  return completeManifest
+  return generatedManifest
 }
 
-const removeDescriptions = function (completeManifest) {
-  // Remove description fields from a complete manifest
-  const publicVars = completeManifest['manifest']['vars']
+const removeDescriptions = function (generatedManifest) {
+  // Remove description fields from a generated manifest
+  const publicVars = generatedManifest['manifest']['vars']
   if (publicVars) {
     const publicVarKeys = Object.keys(publicVars)
     publicVarKeys.map((varName) => {
@@ -101,8 +101,8 @@ const removeDescriptions = function (completeManifest) {
       }
     })
   }
-  return completeManifest
+  return generatedManifest
 }
 module.exports = {
-  generateCompleteManifest
+  generateManifest
 }

@@ -3,7 +3,7 @@ const { validatePrivateVars } = require('./validate-private-vars.js')
 const { validateContainers } = require('./validate-containers.js')
 const { validateSchema } = require('./validate-schema.js')
 
-const validateCompleteManifest = function (manifest) {
+const validateGeneratedManifest = function (manifest) {
   let errors = []
   const schemaErrors = validateSchema(manifest)
 
@@ -19,4 +19,4 @@ const validateCompleteManifest = function (manifest) {
   )
 }
 
-module.exports = { validateCompleteManifest }
+module.exports = { validateGeneratedManifest }

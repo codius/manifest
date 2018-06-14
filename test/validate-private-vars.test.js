@@ -1,7 +1,7 @@
 const { describe, beforeEach, it } = require('mocha')
-const expect = require('chai').expect
+const { expect } = require('chai')
 const testManifest = JSON.stringify(require('./mocks/manifest.test.json'))
-const validatePrivateVars = require('../src/validate-private-vars.js').validatePrivateVars
+const { validatePrivateVars } = require('../src/validate-private-vars.js')
 
 describe('Validate Private Manifest Variables', function () {
   let manifest

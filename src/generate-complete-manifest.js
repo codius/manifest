@@ -1,40 +1,40 @@
-const manifestSchema = require('../schemas/CodiusManifestSpec.json')
+const codiusSchema = require('../schemas/CodiusSpec.json')
 const varsSchema = require('../schemas/CodiusVarsSpec.json')
 const debug = require('debug')('codius-manifest:generate-complete-manifest')
 const fse = require('fs-extra')
 const { hashPrivateVars } = require('./common/crypto-utils.js')
 const jsen = require('jsen')
 
-const generateCompleteManifest = async function (codiusVars, codiusManifest) {
-  const vars = await fse.readJson(codiusVars)
-  const manifest = await fse.readJson(codiusManifest)
-  const validateManifest = jsen(manifestSchema, { greedy: true })
-  const validateVars = jsen(varsSchema, { greedy: true })
+const generateCompleteManifest = async function (codiusVarsPath, codiusPath) {
+  const codiusVars = await fse.readJson(codiusVarsPath)
+  const codius = await fse.readJson(codiusPath)
+  const validateCodiusFile = jsen(codiusSchema, { greedy: true })
+  const validateCodiusVarsFile = jsen(varsSchema, { greedy: true })
 
-  // Validate Codius manifest against schema
-  debug(`validating Codius manifest at ${codiusManifest}`)
-  validateManifest(manifest)
-  const manifestSchemaErrors = validateManifest.errors
-  if (manifestSchemaErrors.length > 0) {
-    throw new Error(`Invalid Codius Manifest Spec at ${codiusManifest}
-      errors: ${JSON.stringify(manifestSchemaErrors, null, 2)}`)
+  // Validate Codius file against schema
+  debug(`validating Codius file at ${codiusPath}...`)
+  validateCodiusFile(codius)
+  const codiusSchemaErrors = validateCodiusFile.errors
+  if (codiusSchemaErrors.length > 0) {
+    throw new Error(`Invalid Codius file at ${codiusPath}
+      errors: ${JSON.stringify(codiusSchemaErrors, null, 2)}`)
   }
 
   // Validate Codius vars against schema
-  debug(`validating Codius vars at ${codiusVars}`)
-  validateVars(vars)
-  const varsSchemaErrors = validateVars.errors
-  if (varsSchemaErrors.length > 0) {
-    throw new Error(`Invalid Codius Vars Spec at ${codiusVars}
-      errors: ${JSON.stringify(varsSchemaErrors, null, 2)}`)
+  debug(`validating Codius vars file at ${codiusVarsPath}...`)
+  validateCodiusVarsFile(codiusVars)
+  const codiusVarsSchemaErrors = validateCodiusVarsFile.errors
+  if (codiusVarsSchemaErrors.length > 0) {
+    throw new Error(`Invalid Codius vars file at ${codiusVarsPath}
+      errors: ${JSON.stringify(codiusVarsSchemaErrors, null, 2)}`)
   }
 
   // Generate a complete Codius manifest
   debug('generating compelete manifest...')
-  const completeManifest = { manifest: manifest['manifest'] }
+  const completeManifest = { manifest: codius['manifest'] }
 
   // Update public vars in the final manifest
-  const publicVars = vars['vars']['public']
+  const publicVars = codiusVars['vars']['public']
   if (publicVars) {
     if (!completeManifest['manifest']['vars']) {
       completeManifest['manifest']['vars'] = publicVars
@@ -46,7 +46,7 @@ const generateCompleteManifest = async function (codiusVars, codiusManifest) {
   }
 
   // Update private vars in the final manifest
-  const privateVars = vars['vars']['private']
+  const privateVars = codiusVars['vars']['private']
   if (privateVars) {
     completeManifest['private'] = { vars: privateVars }
     const privateVarKeys = Object.keys(privateVars)
@@ -61,13 +61,13 @@ const generateCompleteManifest = async function (codiusVars, codiusManifest) {
   return completeManifest
 }
 
-const checkPrivateVarEncodings = function (manifest) {
-  const publicVars = manifest['manifest']['vars']
+const checkPrivateVarEncodings = function (completeManifest) {
+  const publicVars = completeManifest['manifest']['vars']
   if (!publicVars) {
-    manifest['manifest']['vars'] = {}
+    completeManifest['manifest']['vars'] = {}
   }
 
-  const privateVarHashes = hashPrivateVars(manifest)
+  const privateVarHashes = hashPrivateVars(completeManifest)
   const privateVarKeys = Object.keys(privateVarHashes)
   privateVarKeys.map((varName) => {
     const encoding = {
@@ -86,12 +86,12 @@ const checkPrivateVarEncodings = function (manifest) {
       debug(`New encoding for ${varName}: ${JSON.stringify(publicEncoding, null, 2)}`)
     }
   })
-  return manifest
+  return completeManifest
 }
 
-const removeDescriptions = function (manifest) {
-  // Remove description fields from a manifest
-  const publicVars = manifest['manifest']['vars']
+const removeDescriptions = function (completeManifest) {
+  // Remove description fields from a complete manifest
+  const publicVars = completeManifest['manifest']['vars']
   if (publicVars) {
     const publicVarKeys = Object.keys(publicVars)
     publicVarKeys.map((varName) => {
@@ -101,7 +101,7 @@ const removeDescriptions = function (manifest) {
       }
     })
   }
-  return manifest
+  return completeManifest
 }
 module.exports = {
   generateCompleteManifest

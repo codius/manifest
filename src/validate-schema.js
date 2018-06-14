@@ -1,9 +1,9 @@
 const addErrorMessage = require('./common/add-error.js').addErrorMessage
 const jsen = require('jsen')
-const manifestSpec = require('../schemas/ManifestSpec.json')
+const completeManifestSpec = require('../schemas/CompleteManifestSpec.json')
 
 const validateSchema = function (manifest) {
-  const validate = jsen(manifestSpec, { greedy: true })
+  const validate = jsen(completeManifestSpec, { greedy: true })
   validate(manifest)
   return parseSchemaErrors(validate.errors)
 }

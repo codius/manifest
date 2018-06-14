@@ -29,11 +29,11 @@ const generateCompleteManifest = async function (codiusVars, codiusManifest) {
       errors: ${JSON.stringify(varsSchemaErrors, null, 2)}`)
   }
 
-  // Generate complete manifest from Codius
+  // Generate a complete Codius manifest
   debug('generating compelete manifest...')
   const completeManifest = { manifest: manifest['manifest'] }
 
-  // Update public vars in final manifest
+  // Update public vars in the final manifest
   const publicVars = vars['vars']['public']
   if (publicVars) {
     if (!completeManifest['manifest']['vars']) {
@@ -45,7 +45,7 @@ const generateCompleteManifest = async function (codiusVars, codiusManifest) {
     })
   }
 
-  // Update private vars in final manifest
+  // Update private vars in the final manifest
   const privateVars = vars['vars']['private']
   if (privateVars) {
     completeManifest['private'] = { vars: privateVars }

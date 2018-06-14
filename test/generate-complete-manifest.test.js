@@ -15,13 +15,13 @@ const manifestJson = fse.readJsonSync(manifestStatic)
 
 describe('Generate Complete Manifest', function () {
   beforeEach(async function () {
-    // Mock up test codiusvars.json and codius.json
+    // Create mocks for codiusvars.json and codius.json
     await fse.writeJson(varsMock, varsJson)
     await fse.writeJson(manifestMock, manifestJson)
   })
 
   after(async function () {
-    // Remove codiusvars.json and codius.json mock files
+    // Remove the codiusvars.json and codius.json mock files
     await fse.remove(varsMock)
     await fse.remove(manifestMock)
   })
@@ -31,7 +31,7 @@ describe('Generate Complete Manifest', function () {
     expect(result).to.deep.equal(validManifest)
   })
 
-  it('should throw error if codius manifest has schema errors', async function () {
+  it('should throw error if the codius manifest has schema errors', async function () {
     const manifest = JSON.parse(JSON.stringify(manifestJson))
     delete manifest['manifest']['name']
     await fse.writeJson(manifestMock, manifest)
@@ -39,7 +39,7 @@ describe('Generate Complete Manifest', function () {
     return expect(result).to.be.rejected
   })
 
-  it('should throw error if codius vars has schema errors', async function () {
+  it('should throw error if codiusvars has schema errors', async function () {
     const vars = JSON.parse(JSON.stringify(manifestJson))
     delete vars['vars']
     await fse.writeJson(varsMock, vars)
@@ -47,7 +47,7 @@ describe('Generate Complete Manifest', function () {
     return expect(result).to.be.rejected
   })
 
-  it('should override public variables that are already defined in codius manifest', async function () {
+  it('should override public vars that are already defined', async function () {
     const manifest = JSON.parse(JSON.stringify(manifestJson))
     manifest['manifest']['vars']['AWS_ACCESS_KEY'] = { value: 'ABSCEDADFSDSF' }
     await fse.writeJson(manifestMock, manifest)

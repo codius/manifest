@@ -55,7 +55,7 @@ describe('Generate Complete Manifest', function () {
     return expect(result).to.eventually.become(validManifest)
   })
 
-  it('should create the public encoding for a private var if one does not already exist', async function () {
+  it('should create the public encoding for private variables', async function () {
     const manifest = JSON.parse(JSON.stringify(manifestJson))
     delete manifest['manifest']['vars']['AWS_SECRET_KEY']
     await fse.writeJson(manifestMock, manifest)

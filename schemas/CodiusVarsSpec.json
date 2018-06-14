@@ -9,12 +9,6 @@
           "additionalProperties":{
             "type":"object",
             "properties":{
-              "encoding":{
-                "type":"string",
-                "enum":[
-                  "private:sha256"
-                ]
-              },
               "value":{
                 "type":"string"
               },

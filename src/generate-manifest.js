@@ -53,7 +53,7 @@ const generateManifest = async function (codiusVarsPath, codiusPath) {
     privateVarKeys.map((varName) => {
       generatedManifest['private']['vars'][varName] = privateVars[varName]
     })
-    checkPrivateVarEncodings(generatedManifest)
+    addPrivateVarEncodings(generatedManifest)
   }
 
   removeDescriptions(generatedManifest) // remove description fields from manifest
@@ -61,12 +61,11 @@ const generateManifest = async function (codiusVarsPath, codiusPath) {
   return generatedManifest
 }
 
-const checkPrivateVarEncodings = function (generatedManifest) {
+const addPrivateVarEncodings = function (generatedManifest) {
   const publicVars = generatedManifest['manifest']['vars']
   if (!publicVars) {
     generatedManifest['manifest']['vars'] = {}
   }
-
   const privateVarHashes = hashPrivateVars(generatedManifest)
   const privateVarKeys = Object.keys(privateVarHashes)
   privateVarKeys.map((varName) => {
@@ -74,17 +73,9 @@ const checkPrivateVarEncodings = function (generatedManifest) {
       'encoding': 'private:sha256',
       'value': privateVarHashes[varName]
     }
-    const publicEncoding = publicVars[varName]
-    if (!publicEncoding) {
-      debug(`Generating public encoding for ${varName}`)
-      publicVars[varName] = encoding
-      debug(`New encoding for ${varName}: ${JSON.stringify(publicEncoding, null, 2)}`)
-    } else if (publicEncoding['encoding'] !== 'private:sha256' ||
-        publicEncoding['value'] !== privateVarHashes[varName]) {
-      debug(`Replacing invalid public encoding for ${varName}`)
-      publicVars[varName] = encoding
-      debug(`New encoding for ${varName}: ${JSON.stringify(publicEncoding, null, 2)}`)
-    }
+    debug(`Generating public encoding for ${varName}`)
+    publicVars[varName] = encoding
+    debug(`New encoding for ${varName}: ${JSON.stringify(encoding, null, 2)}`)
   })
   return generatedManifest
 }

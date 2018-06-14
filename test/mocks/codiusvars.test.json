@@ -3,10 +3,6 @@
     "public": {
       "AWS_ACCESS_KEY": {
         "value": "AKRTP2SB9AF5TQQ1N1BB"
-      },
-      "AWS_SECRET_KEY": {
-        "encoding": "private:sha256",
-        "value": "95b3449d5b13a4e60e5c0218021354c447907d1762bb410ba8d776bfaa1a3faf"
       }
     },
     "private": {

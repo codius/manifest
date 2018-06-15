@@ -1,7 +1,7 @@
 const { describe, beforeEach, it } = require('mocha')
-const expect = require('chai').expect
+const { expect } = require('chai')
 const testManifest = JSON.stringify(require('./mocks/manifest.test.json'))
-const validateContainers = require('../src/validate-containers.js').validateContainers
+const { validateContainers } = require('../src/validate-containers.js')
 
 describe('Validate Containers in Manifest', function () {
   let manifest

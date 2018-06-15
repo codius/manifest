@@ -1,7 +1,7 @@
 const { describe, beforeEach, it } = require('mocha')
-const expect = require('chai').expect
+const { expect } = require('chai')
 const testManifest = JSON.stringify(require('./mocks/manifest.test.json'))
-const validateSchema = require('../src/validate-schema.js').validateSchema
+const { validateSchema } = require('../src/validate-schema.js')
 
 describe('Validate Manifest Schema', function () {
   let manifest

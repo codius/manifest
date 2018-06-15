@@ -61,6 +61,9 @@
               },
               "value": {
                 "type": "string"
+              },
+              "description": {
+                "type": "string"
               }
             },
             "required": [ "value" ],
@@ -71,29 +74,7 @@
       "required": [ "name", "version", "containers" ],
       "additionalProperties": false
     },
-    "private": {
-      "type": "object",
-      "properties": {
-        "vars": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object",
-            "properties": {
-              "nonce": {
-                "type": "string"
-              },
-              "value": {
-                "type": "string"
-              }
-            },
-            "required": [ "nonce", "value" ],
-            "additionalProperties": false
-          }
-        }
-      },
-      "additionalProperties": false
-    }
-  },
   "required": [ "manifest" ],
   "additionalProperties": false
+  }
 }

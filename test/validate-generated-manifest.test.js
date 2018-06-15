@@ -1,7 +1,7 @@
 const { describe, beforeEach, it } = require('mocha')
-const expect = require('chai').expect
+const { expect } = require('chai')
 const testManifest = JSON.stringify(require('./mocks/manifest.test.json'))
-const validateManifest = require('../src/validate-manifest.js').validateManifest
+const { validateGeneratedManifest } = require('../src/validate-generated-manifest.js')
 
 describe('Validate Entire Manifest', function () {
   let manifest
@@ -11,7 +11,7 @@ describe('Validate Entire Manifest', function () {
   })
 
   it('should not return errors if manifest is valid', function () {
-    const result = validateManifest(manifest)
+    const result = validateGeneratedManifest(manifest)
     expect(result).to.deep.equal([])
   })
 
@@ -20,7 +20,7 @@ describe('Validate Entire Manifest', function () {
     let environment = manifest['manifest']['containers'][0]['environment']
     environment['CODIUS_VAR'] = '$CODIUS_VAR'
     manifest['manifest']['vars']['CODIUS_VAR'] = {'value': ''}
-    const result = validateManifest(manifest)
+    const result = validateGeneratedManifest(manifest)
     const expected = [
       { 'manifest.containers[0].environment.CODIUS_VAR': 'environment variables starting in `CODIUS` are reserved.' }
     ]
@@ -36,7 +36,7 @@ describe('Validate Entire Manifest', function () {
     environment['CODIUS_VAR'] = '$CODIUS_VAR'
     manifest['manifest']['vars']['CODIUS_VAR'] = {'value': ''}
 
-    const result = validateManifest(manifest)
+    const result = validateGeneratedManifest(manifest)
     const expected = [
       { 'manifest.name': "schema is invalid. error={'path':'manifest.name','keyword':'required'}" }
     ]
@@ -45,7 +45,7 @@ describe('Validate Entire Manifest', function () {
 
   it('should return proper errors if public env vars are not defined', function () {
     delete manifest['manifest']['vars']
-    const result = validateManifest(manifest)
+    const result = validateGeneratedManifest(manifest)
     const expected = [
       { 'manifest.containers[0].environment.AWS_ACCESS_KEY': 'cannot validate env variable - manifest.vars not defined' },
       { 'manifest.containers[0].environment.AWS_SECRET_KEY': 'cannot validate env variable - manifest.vars not defined' },

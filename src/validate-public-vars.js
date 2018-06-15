@@ -4,13 +4,13 @@ const debug = require('debug')('codius-manifest:validate-publicvars')
 
 const validatePublicVars = function (manifest) {
   let errors = []
+  debug('validating public variables...')
   const publicVars = manifest['manifest']['vars']
 
   // Check if public vars are not defined
   if (!publicVars) {
     return errors
   }
-  debug('validating public variables...')
   // Check if all public vars are used within the environment
   const publicVarKeys = Object.keys(publicVars)
   publicVarKeys.map((varName) => {
@@ -22,9 +22,7 @@ const validatePublicVars = function (manifest) {
       )
     }
   })
-  debug('public variable errors:')
-  debug(errors)
-
+  debug(`public variable errors: ${JSON.stringify(errors, null, 2)}`)
   return errors
 }
 

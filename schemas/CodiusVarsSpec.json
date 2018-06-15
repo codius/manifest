@@ -1,0 +1,52 @@
+{
+  "type":"object",
+  "properties":{
+    "vars":{
+      "type":"object",
+      "properties":{
+        "public":{
+          "type":"object",
+          "additionalProperties":{
+            "type":"object",
+            "properties":{
+              "value":{
+                "type":"string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "required":[
+              "value"
+            ],
+            "additionalProperties":false
+          }
+        },
+        "private":{
+          "type":"object",
+          "additionalProperties":{
+            "type":"object",
+            "properties":{
+              "nonce":{
+                "type":"string"
+              },
+              "value":{
+                "type":"string"
+              }
+            },
+            "required":[
+              "nonce",
+              "value"
+            ],
+            "additionalProperties":false
+          }
+        },
+        "additionalProperties":false
+      }
+    }
+  },
+  "required":[
+    "vars"
+  ],
+  "additionalProperties":false
+}

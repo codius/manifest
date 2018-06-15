@@ -8,7 +8,7 @@ private environment variables, and other information about pods. Manifests are u
 by [Codius hosts](https://github.com/codius/codiusd) to setup the container environments and download images.
 
 ## Manifest Format
-Manifests must match the standard format, which is specified [here](https://github.com/codius/manifest/blob/master/src/schemas/GeneratedManifestSpec.json).
+Manifests must match the standard format, which is specified [here](https://github.com/codius/manifest/blob/master/schemas/GeneratedManifestSpec.json).
 Manifests that are valid against the standard schema are considered complete.
 ```json
 {
@@ -53,7 +53,7 @@ Manifests are generated from two files: `codius.json` and `codiusvars.json`.
 ### `codius.json`
 This file includes details about the pod to be uploaded . Unlike the generated manifest, `codius.json`
 may contain description fields for public variables. The official specification can be found
-[here](https://github.com/codius/manifest/blob/master/src/schemas/CodiusSpec.json).
+[here](https://github.com/codius/manifest/blob/master/schemas/CodiusSpec.json).
 ```json
 {
   "manifest": {
@@ -88,7 +88,7 @@ may contain description fields for public variables. The official specification 
 This file defines the public and private variables to be included in the
 generated manifest. Similar to `codius.json`, this file may include description
 fields for the public variables. The official specification can be found
-[here](https://github.com/codius/manifest/blob/master/src/schemas/CodiusVarsSpec.json).
+[here](https://github.com/codius/manifest/blob/master/schemas/CodiusVarsSpec.json).
 ```json
 {
   "vars": {

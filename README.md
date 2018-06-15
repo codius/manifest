@@ -16,6 +16,7 @@ Manifests that are valid against the standard schema are considered complete.
     "name": "my-codius-pod",
     "version": "1.0.0",
     "machine": "small",
+    "port": " 8080",
     "containers": [{
       "id": "app",
       "image": "hello-world@sha256:f5233545e43561214ca4891fd1157e1c3c563316ed8e237750d59bde73361e77",
@@ -59,6 +60,7 @@ may contain description fields for public variables. The official specification 
     "name": "my-codius-pod",
     "version": "1.0.0",
     "machine": "small",
+    "port": "8080",
     "containers": [{
       "id": "app",
       "image": "hello-world@sha256:f5233545e43561214ca4891fd1157e1c3c563316ed8e237750d59bde73361e77",

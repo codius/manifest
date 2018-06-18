@@ -18,7 +18,7 @@ const generateManifest = async function (codiusVarsPath, codiusPath) {
   validateCodiusFile(codius)
   const codiusSchemaErrors = validateCodiusFile.errors
   if (codiusSchemaErrors.length > 0) {
-    throw new Error(`In valid Codius file at ${codiusPath}
+    throw new Error(`Invalid Codius file at ${codiusPath}
       errors: ${JSON.stringify(codiusSchemaErrors, null, 2)}`)
   }
 
@@ -94,7 +94,7 @@ const fetchImageDigest = function (generatedManifest, id) {
   const client = drc.createClientV2({ name: repo })
   debug(`fetching digest for the image ${image}`)
 
-  // fetch digest for image
+  // fetch the digest for the image
   return new Promise(function (resolve, reject) {
     client.getManifest(
       { ref: tag },

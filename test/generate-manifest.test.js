@@ -91,6 +91,7 @@ describe('Generate Complete Manifest', function () {
     return expect(result).to.be.rejected
   })
 
+  // Relies upon response from docker registry api to pass
   it('should resolve image tags to proper digest', async function () {
     const manifest = JSON.parse(JSON.stringify(manifestJson))
     manifest['manifest']['containers'][0]['image'] = 'nginx:1.15.0'

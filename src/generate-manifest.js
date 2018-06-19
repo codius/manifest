@@ -1,6 +1,7 @@
 const codiusSchema = require('../schemas/CodiusSpec.json')
 const varsSchema = require('../schemas/CodiusVarsSpec.json')
 const debug = require('debug')('codius-manifest:generate-manifest')
+const drc = require('docker-registry-client')
 const fse = require('fs-extra')
 const { hashPrivateVars } = require('./common/crypto-utils.js')
 const jsen = require('jsen')
@@ -58,7 +59,12 @@ const generateManifest = async function (codiusVarsPath, codiusPath) {
   }
 
   removeDescriptions(generatedManifest) // remove description fields from manifest
-  debug(`Generated Manifest: ${JSON.stringify(generatedManifest, null, 2)}`)
+
+  // check the digest of each container image
+  const containers = generatedManifest['manifest']['containers']
+  for (let i = 0; i < containers.length; i++) {
+    await fetchImageDigest(generatedManifest, i)
+  }
 
   // check if the generated manifest is valid
   const errors = validateGeneratedManifest(generatedManifest)
@@ -66,7 +72,47 @@ const generateManifest = async function (codiusVarsPath, codiusPath) {
     throw new Error(`Generated manifest is invalid. errors:
       ${JSON.stringify(errors, null, 2)}`)
   }
+
+  debug(`Generated Manifest: ${JSON.stringify(generatedManifest, null, 2)}`)
   return generatedManifest
+}
+
+const fetchImageDigest = function (generatedManifest, id) {
+  const container = generatedManifest['manifest']['containers'][id]
+  const image = container['image']
+  if (image.includes('@sha256:')) {
+    return generatedManifest
+  }
+
+  // Parse image id specified in manifest
+  const tokens = image.split(':')
+  if (tokens.length < 2) {
+    throw new Error(`Invalid image has been specified ${image}`)
+  }
+  const tag = tokens.pop()
+  const repo = tokens.join('')
+  const client = drc.createClientV2({ name: repo })
+  debug(`fetching digest for the image ${image}`)
+
+  // fetch the digest for the image
+  return new Promise(function (resolve, reject) {
+    client.getManifest(
+      { ref: tag },
+      function (error, manifest, res, manifestStr) {
+        client.close()
+        if (error) {
+          reject(error)
+        }
+        const digest = res.headers['docker-content-digest']
+        if (!digest) {
+          reject(new Error(`Error fetching digest for image ${image}`))
+        }
+        debug(`Successfully fetched image digest for image ${image}, digest: ${digest}`)
+        container['image'] = `${repo}@${digest}`
+        resolve(container['image'])
+      }
+    )
+  })
 }
 
 const addPrivateVarEncodings = function (generatedManifest) {
@@ -102,6 +148,7 @@ const removeDescriptions = function (generatedManifest) {
   }
   return generatedManifest
 }
+
 module.exports = {
   generateManifest
 }

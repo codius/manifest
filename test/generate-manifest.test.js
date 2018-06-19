@@ -82,4 +82,31 @@ describe('Generate Complete Manifest', function () {
     const result = generateManifest(varsMock, manifestMock)
     return expect(result).to.eventually.become(validManifest)
   })
+
+  it('should produce an error if a container contains an invalid image', async function () {
+    const manifest = JSON.parse(JSON.stringify(manifestJson))
+    manifest['manifest']['containers'][0]['image'] = 'hello-world@1231984'
+    await fse.writeJson(manifestMock, manifest)
+    const result = generateManifest(varsMock, manifestMock)
+    return expect(result).to.be.rejected
+  })
+
+  // Relies upon response from docker registry api to pass
+  it('should resolve image tags to proper digest', async function () {
+    const manifest = JSON.parse(JSON.stringify(manifestJson))
+    manifest['manifest']['containers'][0]['image'] = 'nginx:1.15.0'
+    await fse.writeJson(manifestMock, manifest)
+    const result = generateManifest(varsMock, manifestMock)
+    validManifest['manifest']['containers'][0]['image'] = `nginx@sha256:0946416199aca5c7bd2c3173f8a909b0873e9017562f1a445d061fce6664a049`
+    return expect(result).to.eventually.become(validManifest)
+  })
+
+  it('should not update image hash if digest is already specified', async function () {
+    const manifest = JSON.parse(JSON.stringify(manifestJson))
+    manifest['manifest']['containers'][0]['image'] = 'nginx@sha256:0946416199aca5c7bd2c3173f8a909b0873e9017562f1a445d061fce6664a049'
+    await fse.writeJson(manifestMock, manifest)
+    const result = generateManifest(varsMock, manifestMock)
+    validManifest['manifest']['containers'][0]['image'] = `nginx@sha256:0946416199aca5c7bd2c3173f8a909b0873e9017562f1a445d061fce6664a049`
+    return expect(result).to.eventually.become(validManifest)
+  })
 })

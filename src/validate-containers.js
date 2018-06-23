@@ -12,10 +12,10 @@ const validateContainers = function (manifest) {
   // Validate environment of each container
   for (let i = 0; i < containers.length; i++) {
     const environment = manifest['manifest']['containers'][i]['environment']
-    debug('environment:')
-    debug(environment)
+    debug(`environment: ${JSON.stringify(environment, null, 2)}`)
     // Error check each environment key
-    Object.keys(environment).map((varName) => {
+    const environmentKeys = Object.keys(environment)
+    environmentKeys.map((varName) => {
       const varPath = `manifest.containers[${i}].environment.${varName}`
 
       // Check if env variable name begins with `CODIUS`
@@ -55,6 +55,11 @@ const validateContainers = function (manifest) {
         return
       }
 
+      // Check if private manifest is defined
+      if (!privateManifest) {
+        return
+      }
+
       // Check if environment variable with encoding is defined within private manifest
       const encoding = publicVars[envValue]['encoding']
       const privateVarSpec = privateManifest['vars'] && privateManifest['vars'][envValue]
@@ -66,7 +71,7 @@ const validateContainers = function (manifest) {
           )
         }
       } else if (encoding) {
-        // add error if encoding id defined but not equal to private:sha256
+        // Add error if encoding id is defined but not equal to private:sha256
         addErrorMessage(errors, `manifest.vars.${envValue}`, 'invalid encoding')
       }
     })
@@ -76,6 +81,7 @@ const validateContainers = function (manifest) {
 }
 
 const checkIds = function (containers) {
+  // Check for duplicate container ids
   const errors = []
   const ids = new Set()
 

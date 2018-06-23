@@ -1,82 +1,148 @@
 const codiusSchema = require('../schemas/CodiusSpec.json')
 const varsSchema = require('../schemas/CodiusVarsSpec.json')
 const debug = require('debug')('codius-manifest:generate-manifest')
-const drc = require('docker-registry-client')
 const fse = require('fs-extra')
-const { hashPrivateVars } = require('./common/crypto-utils.js')
+const cryptoUtils = require('./common/crypto-utils.js')
 const jsen = require('jsen')
 const { validateGeneratedManifest } = require('./validate-generated-manifest.js')
+// const drc = require('docker-registry-client')
 
 const generateManifest = async function (codiusVarsPath, codiusPath) {
   const codiusVars = await fse.readJson(codiusVarsPath)
   const codius = await fse.readJson(codiusPath)
-  const validateCodiusFile = jsen(codiusSchema, { greedy: true })
-  const validateCodiusVarsFile = jsen(varsSchema, { greedy: true })
 
-  // Validate Codius file against schema
+  // Validate codius file against schema
   debug(`validating Codius file at ${codiusPath}...`)
+  validateCodiusFileSchema(codius, codiusPath)
+
+  // Validate codiusvars file against schema
+  debug(`validating Codius vars file at ${codiusVarsPath}...`)
+  validateCodiusVarsFileSchema(codiusVars, codiusVarsPath)
+
+  // Generate a complete Codius manifest
+  debug('generating compelete manifest...')
+  const generatedManifest = { manifest: codius['manifest'] }
+  processPublicVars(generatedManifest, codiusVars)
+  processPrivateVars(generatedManifest, codiusVars)
+  removeDescriptions(generatedManifest)
+
+  // Validate generated manifest
+  debug('validating generated manifest...')
+  validateFinalManifest(generatedManifest)
+
+  /**
+  // Validate the digest of each container image
+  debug('validating image digest...')
+  const containers = generatedManifest['manifest']['containers']
+  for (let i = 0; i < containers.length; i++) {
+    await fetchImageDigest(generatedManifest, i)
+  }
+  **/
+
+  debug(`Generated Manifest: ${JSON.stringify(generatedManifest, null, 2)}`)
+  return generatedManifest
+}
+
+const validateCodiusFileSchema = function (codius, codiusPath) {
+  const validateCodiusFile = jsen(codiusSchema, { greedy: true })
   validateCodiusFile(codius)
   const codiusSchemaErrors = validateCodiusFile.errors
   if (codiusSchemaErrors.length > 0) {
     throw new Error(`Invalid Codius file at ${codiusPath}
       errors: ${JSON.stringify(codiusSchemaErrors, null, 2)}`)
   }
+}
 
-  // Validate Codius vars against schema
-  debug(`validating Codius vars file at ${codiusVarsPath}...`)
+const validateCodiusVarsFileSchema = function (codiusVars, codiusVarsPath) {
+  const validateCodiusVarsFile = jsen(varsSchema, { greedy: true })
   validateCodiusVarsFile(codiusVars)
   const codiusVarsSchemaErrors = validateCodiusVarsFile.errors
   if (codiusVarsSchemaErrors.length > 0) {
     throw new Error(`Invalid Codius vars file at ${codiusVarsPath}
       errors: ${JSON.stringify(codiusVarsSchemaErrors, null, 2)}`)
   }
+}
 
-  // Generate a complete Codius manifest
-  debug('generating compelete manifest...')
-  const generatedManifest = { manifest: codius['manifest'] }
-
-  // Update public vars in the final manifest
-  const publicVars = codiusVars['vars']['public']
-  if (publicVars) {
-    if (!generatedManifest['manifest']['vars']) {
-      generatedManifest['manifest']['vars'] = publicVars
-    }
-    const publicVarKeys = Object.keys(publicVars)
-    publicVarKeys.map((varName) => {
-      generatedManifest['manifest']['vars'][varName] = publicVars[varName]
-    })
-  }
-
-  // Update private vars in the final manifest
-  const privateVars = codiusVars['vars']['private']
-  if (privateVars) {
-    generatedManifest['private'] = { vars: privateVars }
-    const privateVarKeys = Object.keys(privateVars)
-    privateVarKeys.map((varName) => {
-      generatedManifest['private']['vars'][varName] = privateVars[varName]
-    })
-    addPrivateVarEncodings(generatedManifest)
-  }
-
-  removeDescriptions(generatedManifest) // remove description fields from manifest
-
-  // check the digest of each container image
-  const containers = generatedManifest['manifest']['containers']
-  for (let i = 0; i < containers.length; i++) {
-    await fetchImageDigest(generatedManifest, i)
-  }
-
-  // check if the generated manifest is valid
+const validateFinalManifest = function (generatedManifest) {
   const errors = validateGeneratedManifest(generatedManifest)
   if (errors.length > 0) {
     throw new Error(`Generated manifest is invalid. errors:
       ${JSON.stringify(errors, null, 2)}`)
   }
-
-  debug(`Generated Manifest: ${JSON.stringify(generatedManifest, null, 2)}`)
-  return generatedManifest
 }
 
+const processPublicVars = function (generatedManifest, codiusVars) {
+  // Update public vars in the final manifest
+  const publicVars = codiusVars['vars']['public']
+  const publicVarKeys = Object.keys(publicVars)
+
+  // Check if public vars are specified in codiusvars
+  if (publicVarKeys.length < 1) {
+    return
+  }
+
+  const manifest = generatedManifest['manifest']
+  const manifestVars = manifest['vars']
+  // Add public vars to manifest vars
+  if (manifest['vars']) {
+    manifest['vars'] = { ...manifestVars, ...publicVars }
+  } else {
+    manifest['vars'] = publicVars
+  }
+}
+
+const processPrivateVars = function (generatedManifest, codiusVars) {
+  // Update private vars in the final manifest
+  const privateVars = codiusVars['vars']['private']
+  const privateVarKeys = Object.keys(privateVars)
+
+  if (privateVarKeys.length < 1) {
+    return
+  }
+  // Add nonce field to private vars
+  privateVarKeys.map((varName) => {
+    privateVars[varName]['nonce'] = cryptoUtils.generateNonce()
+  })
+  // Add private vars to final manifest
+  generatedManifest['private'] = { vars: privateVars }
+  addPrivateVarEncodings(generatedManifest)
+}
+
+const addPrivateVarEncodings = function (generatedManifest) {
+  // Add public encodings for private variables
+  const manifest = generatedManifest['manifest']
+  if (!manifest['vars']) {
+    manifest['vars'] = {}
+  }
+  const privateVarHashes = cryptoUtils.hashPrivateVars(generatedManifest)
+  const privateVarKeys = Object.keys(privateVarHashes)
+  privateVarKeys.map((varName) => {
+    debug(`Generating public encoding for ${varName}`)
+    const encoding = {
+      'encoding': 'private:sha256',
+      'value': privateVarHashes[varName]
+    }
+    manifest['vars'][varName] = encoding
+    debug(`New encoding for ${varName}: ${JSON.stringify(encoding, null, 2)}`)
+  })
+}
+
+const removeDescriptions = function (generatedManifest) {
+  // Remove description fields from a generated manifest
+  const publicVars = generatedManifest['manifest']['vars']
+  if (!publicVars) {
+    return
+  }
+  const publicVarKeys = Object.keys(publicVars)
+  publicVarKeys.map((varName) => {
+    const publicVar = publicVars[varName]
+    if (publicVar['description']) {
+      delete publicVar['description']
+    }
+  })
+}
+
+/**
 const fetchImageDigest = function (generatedManifest, id) {
   const container = generatedManifest['manifest']['containers'][id]
   const image = container['image']
@@ -114,40 +180,7 @@ const fetchImageDigest = function (generatedManifest, id) {
     )
   })
 }
-
-const addPrivateVarEncodings = function (generatedManifest) {
-  const publicVars = generatedManifest['manifest']['vars']
-  if (!publicVars) {
-    generatedManifest['manifest']['vars'] = {}
-  }
-  const privateVarHashes = hashPrivateVars(generatedManifest)
-  const privateVarKeys = Object.keys(privateVarHashes)
-  privateVarKeys.map((varName) => {
-    const encoding = {
-      'encoding': 'private:sha256',
-      'value': privateVarHashes[varName]
-    }
-    debug(`Generating public encoding for ${varName}`)
-    publicVars[varName] = encoding
-    debug(`New encoding for ${varName}: ${JSON.stringify(encoding, null, 2)}`)
-  })
-  return generatedManifest
-}
-
-const removeDescriptions = function (generatedManifest) {
-  // Remove description fields from a generated manifest
-  const publicVars = generatedManifest['manifest']['vars']
-  if (publicVars) {
-    const publicVarKeys = Object.keys(publicVars)
-    publicVarKeys.map((varName) => {
-      const publicVar = publicVars[varName]
-      if (publicVar['description']) {
-        delete publicVar['description']
-      }
-    })
-  }
-  return generatedManifest
-}
+**/
 
 module.exports = {
   generateManifest

@@ -114,7 +114,7 @@ describe('Generate Complete Manifest', function () {
     return expect(result).to.eventually.become(newValidManifest)
   })
 
-  it('should add an empty private var field to the final manifest if the addEmptyPrivateVars option is specified and the public vars are not defined', async function () {
+  it('should add an empty private var field to the final manifest if the public vars are defined', async function () {
     const manifest = JSON.parse(JSON.stringify(manifestJson))
     delete manifest['manifest']['vars']['AWS_SECRET_KEY']
     delete manifest['manifest']['containers'][0]['environment']['AWS_SECRET_KEY']
@@ -129,8 +129,7 @@ describe('Generate Complete Manifest', function () {
     newValidManifest['private'] = {}
     delete newValidManifest['manifest']['containers'][0]['environment']['AWS_SECRET_KEY']
     delete newValidManifest['manifest']['vars']['AWS_SECRET_KEY']
-    const options = { addEmptyPrivateVars: true }
-    const result = generateManifest(varsMock, manifestMock, options)
+    const result = generateManifest(varsMock, manifestMock)
     return expect(result).to.eventually.become(newValidManifest)
   }
 
@@ -151,24 +150,6 @@ describe('Generate Complete Manifest', function () {
     delete newValidManifest['manifest']['vars']['AWS_ACCESS_KEY']
     newValidManifest['manifest']['containers'][0]['environment']['AWS_SECRET_KEY'] = '$AWS_SECRET_KEY'
     newValidManifest['manifest']['containers'][0]['environment']['AWS_ACCESS_KEY'] = 'AWS_ACCESS_KEY'
-    const result = generateManifest(varsMock, manifestMock)
-    return expect(result).to.eventually.become(newValidManifest)
-  })
-
-  it('should leave out private vars field from final manifest if private vars are not defined in codiusvars', async function () {
-    const manifest = JSON.parse(JSON.stringify(manifestJson))
-    manifest['manifest']['containers'][0]['environment']['AWS_SECRET_KEY'] = 'AWS_SECRET_KEY'
-    delete manifest['manifest']['vars']['AWS_SECRET_KEY']
-    await fse.writeJson(manifestMock, manifest)
-
-    const vars = JSON.parse(JSON.stringify(varsJson))
-    vars['vars']['private'] = {}
-    await fse.writeJson(varsMock, vars)
-
-    const newValidManifest = JSON.parse(JSON.stringify(validManifest))
-    delete newValidManifest['manifest']['vars']['AWS_SECRET_KEY']
-    delete newValidManifest['private']
-    newValidManifest['manifest']['containers'][0]['environment']['AWS_SECRET_KEY'] = 'AWS_SECRET_KEY'
     const result = generateManifest(varsMock, manifestMock)
     return expect(result).to.eventually.become(newValidManifest)
   })

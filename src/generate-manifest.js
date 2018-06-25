@@ -7,7 +7,7 @@ const jsen = require('jsen')
 const { validateGeneratedManifest } = require('./validate-generated-manifest.js')
 // const drc = require('docker-registry-client')
 
-const generateManifest = async function (codiusVarsPath, codiusPath, options = {}) {
+const generateManifest = async function (codiusVarsPath, codiusPath) {
   const codiusVars = await fse.readJson(codiusVarsPath)
   const codius = await fse.readJson(codiusPath)
 
@@ -34,13 +34,12 @@ const generateManifest = async function (codiusVarsPath, codiusPath, options = {
   // Codiusd will reject contract uploads that have public
   // vars defined but no private manifest field, although the latter is optional
   // See codiusd issue #75: https://github.com/codius/codiusd/issues/75
-  if (options.addEmptyPrivateVars) {
-    const publicVars = generatedManifest['manifest']['vars']
-    const privateVars = generatedManifest['manifest']['private']
-    if (publicVars && !privateVars) {
-      generatedManifest['private'] = {}
-    }
+  const publicVars = generatedManifest['manifest']['vars']
+  const privateVars = generatedManifest['private']
+  if (publicVars && !privateVars) {
+    generatedManifest['private'] = {}
   }
+
   /**
   // Validate the digest of each container image
   debug('validating image digest...')

@@ -114,6 +114,28 @@ describe('Generate Complete Manifest', function () {
     return expect(result).to.eventually.become(newValidManifest)
   })
 
+  it('should add an empty private var field to the final manifest if the addEmptyPrivateVars option is specified and the public vars are not defined', async function () {
+    const manifest = JSON.parse(JSON.stringify(manifestJson))
+    delete manifest['manifest']['vars']['AWS_SECRET_KEY']
+    delete manifest['manifest']['containers'][0]['environment']['AWS_SECRET_KEY']
+    delete manifest['private']
+    await fse.writeJson(manifestMock, manifest)
+
+    const vars = JSON.parse(JSON.stringify(varsJson))
+    delete vars['vars']['private']['AWS_SECRET_KEY']
+    await fse.writeJson(varsMock, vars)
+
+    const newValidManifest = JSON.parse(JSON.stringify(validManifest))
+    newValidManifest['private'] = {}
+    delete newValidManifest['manifest']['containers'][0]['environment']['AWS_SECRET_KEY']
+    delete newValidManifest['manifest']['vars']['AWS_SECRET_KEY']
+    const options = { addEmptyPrivateVars: true }
+    const result = generateManifest(varsMock, manifestMock, options)
+    return expect(result).to.eventually.become(newValidManifest)
+  }
+
+  )
+
   it('should add public encodings for private vars field even if public vars are not defined in codiusvars', async function () {
     const manifest = JSON.parse(JSON.stringify(manifestJson))
     delete manifest['manifest']['vars']

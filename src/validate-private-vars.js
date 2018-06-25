@@ -6,13 +6,13 @@ const debug = require('debug')('codius-manifest:validate-privatevars')
 const validatePrivateVars = function (manifest) {
   let errors = []
   debug('validating private variables...')
-  const publicVars = manifest['manifest']['vars']
 
   // Check if private vars are not defined
   if (!manifest['private']) {
     return errors
   }
   // Check if public vars are defined
+  const publicVars = manifest['manifest']['vars']
   if (!publicVars) {
     addErrorMessage(errors, 'private', 'cannot validate private vars' +
       ` - manifest.vars is not defined.`)

@@ -7,7 +7,7 @@ const jsen = require('jsen')
 const { validateGeneratedManifest } = require('./validate-generated-manifest.js')
 // const drc = require('docker-registry-client')
 
-const generateManifest = async function (codiusVarsPath, codiusPath) {
+const generateManifest = async function (codiusVarsPath, codiusPath, options = {}) {
   const codiusVars = await fse.readJson(codiusVarsPath)
   const codius = await fse.readJson(codiusPath)
 
@@ -30,6 +30,14 @@ const generateManifest = async function (codiusVarsPath, codiusPath) {
   debug('validating generated manifest...')
   validateFinalManifest(generatedManifest)
 
+  // Optionally add an empty private vars field
+  if (options.addEmptyPrivateVars) {
+    const publicVars = generatedManifest['manifest']['vars']
+    const privateVars = generatedManifest['manifest']['private']
+    if (publicVars && !privateVars) {
+      generatedManifest['private'] = {}
+    }
+  }
   /**
   // Validate the digest of each container image
   debug('validating image digest...')

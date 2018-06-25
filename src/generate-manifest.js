@@ -30,7 +30,10 @@ const generateManifest = async function (codiusVarsPath, codiusPath, options = {
   debug('validating generated manifest...')
   validateFinalManifest(generatedManifest)
 
-  // Optionally add an empty private vars field
+  // Automatically add an empty private vars field to the final manifest.
+  // Codiusd will reject contract uploads that have public
+  // vars defined but no private manifest field, although the latter is optional
+  // See codiusd issue #75: https://github.com/codius/codiusd/issues/75
   if (options.addEmptyPrivateVars) {
     const publicVars = generatedManifest['manifest']['vars']
     const privateVars = generatedManifest['manifest']['private']

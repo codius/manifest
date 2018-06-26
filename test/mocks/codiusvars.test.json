@@ -7,7 +7,6 @@
     },
     "private": {
       "AWS_SECRET_KEY": {
-        "nonce": "123450325",
         "value": "AKRTP2SB9AF5TQQ1N1BC"
       }
     }

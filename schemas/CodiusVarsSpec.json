@@ -27,17 +27,11 @@
           "additionalProperties":{
             "type":"object",
             "properties":{
-              "nonce":{
-                "type":"string"
-              },
               "value":{
                 "type":"string"
               }
             },
-            "required":[
-              "nonce",
-              "value"
-            ],
+            "required":[ "value" ],
             "additionalProperties":false
           }
         },

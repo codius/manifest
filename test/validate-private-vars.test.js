@@ -37,7 +37,14 @@ describe('Validate Private Manifest Variables', function () {
 
   it('should return errors if a private variable is never used in a container', function () {
     delete manifest['manifest']['containers'][0]['environment']['AWS_SECRET_KEY']
-
+    const result = validatePrivateVars(manifest, 0)
+    const expected = [{ 'private.AWS_SECRET_KEY':
+    'private var is never used within a container'
+    }]
+    expect(result).to.deep.equal(expected)
+  })
+  it('should return errors if private vars are defined but there are no environment fields in the containers', function () {
+    delete manifest['manifest']['containers'][0]['environment']
     const result = validatePrivateVars(manifest, 0)
     const expected = [{ 'private.AWS_SECRET_KEY':
     'private var is never used within a container'

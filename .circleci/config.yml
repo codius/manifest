@@ -70,7 +70,7 @@ jobs:
 
       - run:
           name: Publish to NPM (only if a new version has been tagged)
-          command: if [ "$(npm show ilp-protocol-stream version)" != "$(npm ls --depth=-1 2>/dev/null | head -1 | cut -f 1 -d " " | cut -f 2 -d @)" ] ; then npm publish ; fi
+          command: if [ "$(npm show codius-manifest version)" != "$(npm ls --depth=-1 2>/dev/null | head -1 | cut -f 1 -d " " | cut -f 2 -d @)" ] ; then npm publish ; fi
 
 workflows:
   version: 2

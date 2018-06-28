@@ -13,6 +13,9 @@ const validateContainers = function (manifest) {
   for (let i = 0; i < containers.length; i++) {
     const environment = manifest['manifest']['containers'][i]['environment']
     debug(`environment: ${JSON.stringify(environment, null, 2)}`)
+    if (!environment) {
+      continue
+    }
     // Error check each environment key
     const environmentKeys = Object.keys(environment)
     environmentKeys.map((varName) => {

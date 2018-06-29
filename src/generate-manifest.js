@@ -83,7 +83,7 @@ const validateFinalManifest = function (generatedManifest) {
 
 const processPublicVars = function (generatedManifest, codiusVars) {
   // Update public vars in the final manifest
-  const publicVars = codiusVars['vars']['public']
+  const publicVars = codiusVars['vars']['public'] || {}
   const publicVarKeys = Object.keys(publicVars)
 
   // Check if public vars are specified in codiusvars
@@ -103,7 +103,7 @@ const processPublicVars = function (generatedManifest, codiusVars) {
 
 const processPrivateVars = function (generatedManifest, codiusVars) {
   // Update private vars in the final manifest
-  const privateVars = codiusVars['vars']['private']
+  const privateVars = codiusVars['vars']['private'] || {}
   const privateVarKeys = Object.keys(privateVars)
 
   if (privateVarKeys.length < 1) {

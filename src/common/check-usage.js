@@ -7,10 +7,10 @@ const checkUsage = function (manifest, varName) {
 
   for (let i = 0; i < containers.length; i++) {
     const container = containers[i]
-    const envVars = container['environment']
+    const envVars = container['environment'] || {}
 
     // Check if there is a key that corresponds to the variable name
-    if (envVars['varName']) {
+    if (envVars[varName]) {
       return true
     } else {
       // Check if there's an env value that equals `$ + varName`

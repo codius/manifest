@@ -11,7 +11,7 @@ const validateContainers = function (manifest) {
   debug('validating containers...')
   // Validate environment of each container
   for (let i = 0; i < containers.length; i++) {
-    const environment = manifest['manifest']['containers'][i]['environment']
+    const environment = manifest['manifest']['containers'][i]['environment'] || {}
     debug(`environment: ${JSON.stringify(environment, null, 2)}`)
     // Error check each environment key
     const environmentKeys = Object.keys(environment)

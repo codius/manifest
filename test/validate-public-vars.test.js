@@ -29,4 +29,13 @@ describe('Validate Public Manifest Variables', function () {
     }]
     expect(result).to.deep.equal(expected)
   })
+
+  it('should return errors if public vars are defined but there are no environment fields', function () {
+    let containers = manifest['manifest']['containers']
+    delete containers[0]['environment']
+    const result = validatePublicVars(manifest)
+    const expected = [{ 'manifest.vars.AWS_ACCESS_KEY': 'public var is not used within a container' },
+      { 'manifest.vars.AWS_SECRET_KEY': 'public var is not used within a container' }]
+    expect(result).to.deep.equal(expected)
+  })
 })

@@ -162,6 +162,44 @@ describe('Generate Complete Manifest', function () {
     return expect(result).to.eventually.become(validManifest)
   })
 
+  it('should not throw an error if the environment and vars fields are undefined', async function () {
+    const manifest = JSON.parse(JSON.stringify(manifestJson))
+    delete manifest['manifest']['containers'][0]['environment']
+    delete manifest['manifest']['vars']
+    await fse.writeJson(manifestMock, manifest)
+
+    const vars = JSON.parse(JSON.stringify(varsJson))
+    vars['vars']['public'] = {}
+    vars['vars']['private'] = {}
+    await fse.writeJson(varsMock, vars)
+
+    const newValidManifest = JSON.parse(JSON.stringify(validManifest))
+    delete newValidManifest['manifest']['vars']
+    delete newValidManifest['private']
+    delete newValidManifest['manifest']['containers'][0]['environment']
+    const result = generateManifest(varsMock, manifestMock)
+    return expect(result).to.eventually.become(newValidManifest)
+  })
+
+  it('should remove empty environment fields from containers in final manifest', async function () {
+    const manifest = JSON.parse(JSON.stringify(manifestJson))
+    manifest['manifest']['containers'][0]['environment'] = {}
+    delete manifest['manifest']['vars']
+    await fse.writeJson(manifestMock, manifest)
+
+    const vars = JSON.parse(JSON.stringify(varsJson))
+    vars['vars']['public'] = {}
+    vars['vars']['private'] = {}
+    await fse.writeJson(varsMock, vars)
+
+    const newValidManifest = JSON.parse(JSON.stringify(validManifest))
+    delete newValidManifest['manifest']['vars']
+    delete newValidManifest['private']
+    delete newValidManifest['manifest']['containers'][0]['environment']
+    const result = generateManifest(varsMock, manifestMock)
+    return expect(result).to.eventually.become(newValidManifest)
+  })
+
   /*
   it('should produce an error if a container contains an invalid image', async function () {
     const manifest = JSON.parse(JSON.stringify(manifestJson))

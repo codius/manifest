@@ -24,6 +24,7 @@ const generateManifest = async function (codiusVarsPath, codiusPath) {
   const generatedManifest = { manifest: codius['manifest'] }
   processPublicVars(generatedManifest, codiusVars)
   processPrivateVars(generatedManifest, codiusVars)
+  removeEmptyEnvironments(generatedManifest)
   removeDescriptions(generatedManifest)
 
   // Validate generated manifest
@@ -116,6 +117,20 @@ const processPrivateVars = function (generatedManifest, codiusVars) {
   // Add private vars to final manifest
   generatedManifest['private'] = { vars: privateVars }
   addPrivateVarEncodings(generatedManifest)
+}
+
+const removeEmptyEnvironments = function (generatedManifest) {
+  // Remove empty environment fields from containers
+  const containers = generatedManifest['manifest']['containers']
+  containers.map((container) => {
+    const environment = container['environment']
+    if (environment) {
+      const envVars = Object.keys(environment)
+      if (envVars.length < 1) {
+        delete container['environment']
+      }
+    }
+  })
 }
 
 const addPrivateVarEncodings = function (generatedManifest) {

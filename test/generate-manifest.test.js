@@ -1,33 +1,36 @@
+/* eslint-env mocha */
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
 const { expect } = chai
 chai.use(chaiAsPromised)
 const cryptoUtils = require('../src/common/crypto-utils.js')
 const fse = require('fs-extra')
-const { after, before, beforeEach, describe, it } = require('mocha')
 const { generateManifest } = require('../src/generate-manifest.js')
-const sinon = require('sinon')
 const validManifestMock = './test/mocks/manifest.test.json'
+const axios = require('axios')
 const varsStatic = './test/mocks/codiusvars.test.json'
 const varsMock = './test/codiusvars.mock.json'
 const manifestStatic = './test/mocks/codius.test.json'
 const manifestMock = './test/mocks/codius.mock.json'
+const sinon = require('sinon')
 
 describe('Generate Complete Manifest', function () {
   let validManifest = fse.readJsonSync(validManifestMock)
   const varsJson = fse.readJsonSync(varsStatic) // codiusvars.json
   const manifestJson = fse.readJsonSync(manifestStatic) // codius.json
 
-  before(function () {
-    // Create stub for generateNonce function
-    const stub = sinon.stub(cryptoUtils, 'generateNonce')
-    stub.returns('123450325')
-  })
-
   beforeEach(async function () {
     // Create mocks for codiusvars.json and codius.json
     await fse.writeJson(varsMock, varsJson)
     await fse.writeJson(manifestMock, manifestJson)
+
+    this.sinon = sinon.createSandbox()
+    this.get = this.sinon.stub(axios, 'get')
+    this.generateNonce = this.sinon.stub(cryptoUtils, 'generateNonce').returns('123450325')
+  })
+
+  afterEach(function () {
+    this.sinon.restore()
   })
 
   after(async function () {
@@ -200,24 +203,36 @@ describe('Generate Complete Manifest', function () {
     return expect(result).to.eventually.become(newValidManifest)
   })
 
-  /*
+  // Relies on response from docker registry api to pass
   it('should produce an error if a container contains an invalid image', async function () {
+    const manifestUrl = 'https://registry-1.docker.io/v2/library/nginx/manifests/1231984'
+    this.get.withArgs(manifestUrl).throws('Error: Request failed with status code 404')
+    this.get.callThrough()
+
     const manifest = JSON.parse(JSON.stringify(manifestJson))
-    manifest['manifest']['containers'][0]['image'] = 'hello-world@1231984'
+    manifest['manifest']['containers'][0]['image'] = 'nginx:1231984'
     await fse.writeJson(manifestMock, manifest)
     const result = generateManifest(varsMock, manifestMock)
-    return expect(result).to.be.rejected
-  })
+    return expect(result).to.be.rejectedWith('Unable to get manifest info from registry.')
+  }).timeout(3000)
 
-  // Relies upon response from docker registry api to pass
+  // Relies on response from docker registry api to pass
   it('should resolve image tags to proper digest', async function () {
+    const manifestUrl = 'https://registry-1.docker.io/v2/library/nginx/manifests/1.15.0'
+    this.get.withArgs(manifestUrl).returns({
+      headers: {
+        'docker-content-digest': 'sha256:62a095e5da5f977b9f830adaf64d604c614024bf239d21068e4ca826d0d629a4'
+      }
+    })
+    this.get.callThrough()
+
     const manifest = JSON.parse(JSON.stringify(manifestJson))
     manifest['manifest']['containers'][0]['image'] = 'nginx:1.15.0'
     await fse.writeJson(manifestMock, manifest)
     const result = generateManifest(varsMock, manifestMock)
-    validManifest['manifest']['containers'][0]['image'] = `nginx@sha256:0946416199aca5c7bd2c3173f8a909b0873e9017562f1a445d061fce6664a049`
+    validManifest['manifest']['containers'][0]['image'] = 'nginx@sha256:62a095e5da5f977b9f830adaf64d604c614024bf239d21068e4ca826d0d629a4'
     return expect(result).to.eventually.become(validManifest)
-  })
+  }).timeout(3000)
 
   it('should not update image hash if digest is already specified', async function () {
     const manifest = JSON.parse(JSON.stringify(manifestJson))
@@ -227,5 +242,4 @@ describe('Generate Complete Manifest', function () {
     validManifest['manifest']['containers'][0]['image'] = `nginx@sha256:0946416199aca5c7bd2c3173f8a909b0873e9017562f1a445d061fce6664a049`
     return expect(result).to.eventually.become(validManifest)
   })
-  */
 })

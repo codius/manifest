@@ -47,6 +47,30 @@ Manifests that are valid against the standard schema are considered complete.
   }
 }
 ```
+## Simple Manifest
+A simple manifest has the environment fields fully interpolated, with the public and private
+variable fields removed.
+
+```json
+{
+  "manifest": {
+    "name": "my-codius-pod",
+    "version": "1.0.0",
+    "machine": "small",
+    "port": " 8080",
+    "containers": [{
+      "id": "app",
+      "image": "hello-world@sha256:f5233545e43561214ca4891fd1157e1c3c563316ed8e237750d59bde73361e77",
+      "command": ["/bin/sh"],
+      "workdir": "/root",
+      "environment": {
+        "AWS_ACCESS_KEY": "AKRTP2SB9AF5TQQ1N1BB",
+        "AWS_SECRET_KEY": "AKRTP2SB9AF5TQQ1N1BC"
+      }
+    }]
+  }
+}
+```
 
 ## Codius Files
 Manifests are generated from two files: `codius.json` and `codiusvars.json`.
@@ -165,6 +189,16 @@ Arguments:
   * Description: the manifest to be hashed
 
 The function returns the `sha256` manifest hash with `base32` encoding.
+
+### `generateSimpleManifest(manifest)`
+Generates a manifest with the container environment fields interpolated.
+
+Arguments:
+* `manifest`
+  * Type: JSON
+  * Description: the manifest to be interpolated
+
+The function returns a JSON object representing the interpolated manifest, with the public and private variable fields removed.
 
 ## Usage
 The module can be used to easily generate manifest files.

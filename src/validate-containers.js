@@ -8,11 +8,12 @@ const validateContainers = function (manifest) {
 
   // Check if container ids are unique
   errors = errors.concat(checkIds(containers))
+
   debug('validating containers...')
-  // Validate environment of each container
-  for (let i = 0; i < containers.length; i++) {
-    const environment = manifest['manifest']['containers'][i]['environment'] || {}
+  containers.forEach((container, i) => {
+    const environment = container['environment'] || {}
     debug(`environment: ${JSON.stringify(environment, null, 2)}`)
+
     // Error check each environment key
     const environmentKeys = Object.keys(environment)
     environmentKeys.map((varName) => {
@@ -41,13 +42,11 @@ const validateContainers = function (manifest) {
         )
         return
       }
-
       envValue = envValue.substring(1) // remove $ from env value
 
-      // Check env variable is specified in manfiest.vars
+      // Environment variable must be defined within manifest.vars if the value
+      // begins with `$`
       if (!publicVars[envValue]) {
-        // Environment variable must be defined within manifest.vars if the value
-        // begins with `$`
         addErrorMessage(
           errors, varPath,
           'env variable is not defined within manifest.vars.'
@@ -63,6 +62,9 @@ const validateContainers = function (manifest) {
       // Check if environment variable with encoding is defined within private manifest
       const encoding = publicVars[envValue]['encoding']
       const privateVarSpec = privateManifest['vars'] && privateManifest['vars'][envValue]
+      if (!encoding) {
+        return
+      }
       if (encoding === 'private:sha256') {
         if (!privateVarSpec) {
           addErrorMessage(
@@ -70,12 +72,14 @@ const validateContainers = function (manifest) {
             'encoded env variable is not defined within private manifest field'
           )
         }
-      } else if (encoding) {
+      } else {
         // Add error if encoding id is defined but not equal to private:sha256
-        addErrorMessage(errors, `manifest.vars.${envValue}`, 'invalid encoding')
+        addErrorMessage(
+          errors, `manifest.vars.${envValue}`, 'invalid encoding'
+        )
       }
     })
-  }
+  })
   debug(`container validation errors: ${JSON.stringify(errors, null, 2)}`)
   return errors
 }
@@ -85,14 +89,13 @@ const checkIds = function (containers) {
   const errors = []
   const ids = new Set()
 
-  for (let i = 0; i < containers.length; i++) {
-    ids.add(containers[i].id)
+  for (const container of containers) {
+    ids.add(container.id)
   }
 
   if (ids.size < containers.length) {
     addErrorMessage(errors, 'manifest.containers', 'container ids must be unique.')
   }
-
   return errors
 }
 

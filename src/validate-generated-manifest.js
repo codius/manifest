@@ -16,11 +16,14 @@ const validateGeneratedManifest = function (manifest) {
     return schemaErrors
   }
 
-  errors = errors.concat(
-    validateContainers(manifest),
-    validatePublicVars(manifest),
-    validatePrivateVars(manifest)
-  )
+  const containerErrors = validateContainers(manifest)
+  const publicVarErrors = validatePublicVars(manifest)
+  const privateVarErrors = validatePrivateVars(manifest)
+  errors = [
+    ...containerErrors,
+    ...publicVarErrors,
+    ...privateVarErrors
+  ]
   debug(`manifest errors: ${JSON.stringify(errors, null, 2)}`)
   return errors
 }

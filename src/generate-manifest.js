@@ -85,20 +85,15 @@ const processPublicVars = function (generatedManifest, codiusVars) {
   // Update public vars in the final manifest
   const publicVars = codiusVars['vars']['public'] || {}
   const publicVarKeys = Object.keys(publicVars)
-
   // Check if public vars are specified in codiusvars
   if (publicVarKeys.length < 1) {
     return
   }
 
+  // Add public vars to manifest vars
   const manifest = generatedManifest['manifest']
   const manifestVars = manifest['vars']
-  // Add public vars to manifest vars
-  if (manifest['vars']) {
-    manifest['vars'] = { ...manifestVars, ...publicVars }
-  } else {
-    manifest['vars'] = publicVars
-  }
+  manifest['vars'] = manifestVars ? { ...manifestVars, ...publicVars } : publicVars
 }
 
 const processPrivateVars = function (generatedManifest, codiusVars) {

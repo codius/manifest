@@ -82,9 +82,10 @@ const getManifestResp = async function (image, token) {
     const registryUrl = getRegistryUrl(image)
 
     // Build url for manifest request - see https://docs.docker.com/registry/spec/api/
-    let manifestUrl = `${registryUrl}${namespace || 'library'}/${repository}/manifests/${tag}`
+    let manifestUrl = `${registryUrl}${namespace || 'library'}/${repository}/manifests/${tag || 'latest'}`
     debug(`fetching manifest info from registry manifest endpoint. manifestUrl=${manifestUrl} manifestOptions=${JSON.stringify(manifestOptions, null, 2)}`)
-    return await axios.get(manifestUrl, manifestOptions)
+    const { data, headers } = await axios.get(manifestUrl, manifestOptions)
+    return { data, headers }
   } catch (err) {
     debug(err)
     throw new Error('Unable to get manifest info from registry.')

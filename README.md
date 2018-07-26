@@ -149,6 +149,13 @@ Arguments:
 
 The function returns a JSON object representing the generated manifest.
 
+*NOTE: Docker image fields without a `sha256` hash will be resolved to include the image digest.* For example:
+```text
+  nginx:1.15.0 => nginx@sha256:62a095e5da5f977b9f830adaf64d604c614024bf239d21068e4ca826d0d629a4
+```
+This ensures that a host will pull identical images for a single manifest upon multiple uploads.
+The image resolution functionality was partially adapted from the [docker-manifest](https://github.com/bmonty/docker-manifest) module.
+
 ### `hashManifest(manifest)`
 Generates the hash of a complete Codius manifest.
 

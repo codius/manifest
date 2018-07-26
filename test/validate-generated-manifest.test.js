@@ -1,4 +1,4 @@
-const { describe, beforeEach, it } = require('mocha')
+/* eslint-env mocha */
 const { expect } = require('chai')
 const testManifest = JSON.stringify(require('./mocks/manifest.test.json'))
 const { validateGeneratedManifest } = require('../src/validate-generated-manifest.js')

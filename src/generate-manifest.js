@@ -5,7 +5,7 @@ const fse = require('fs-extra')
 const cryptoUtils = require('./common/crypto-utils.js')
 const jsen = require('jsen')
 const { validateGeneratedManifest } = require('./validate-generated-manifest.js')
-// const drc = require('docker-registry-client')
+const { resolveImage } = require('./resolve-image.js')
 
 const generateManifest = async function (codiusVarsPath, codiusPath) {
   const codiusVars = await fse.readJson(codiusVarsPath)
@@ -41,15 +41,14 @@ const generateManifest = async function (codiusVarsPath, codiusPath) {
     generatedManifest['private'] = {}
   }
 
-  /**
-  // Validate the digest of each container image
+  // Resolve the tag of each docker image
   debug('validating image digest...')
   const containers = generatedManifest['manifest']['containers']
-  for (let i = 0; i < containers.length; i++) {
-    await fetchImageDigest(generatedManifest, i)
-  }
-  **/
-
+  const containerPromises = containers.map(async (container) => {
+    const resolvedImage = await resolveImage(container['image'])
+    container['image'] = resolvedImage
+  })
+  await Promise.all(containerPromises)
   debug(`Generated Manifest: ${JSON.stringify(generatedManifest, null, 2)}`)
   return generatedManifest
 }
@@ -166,46 +165,6 @@ const removeDescriptions = function (generatedManifest) {
     }
   })
 }
-
-/**
-const fetchImageDigest = function (generatedManifest, id) {
-  const container = generatedManifest['manifest']['containers'][id]
-  const image = container['image']
-  if (image.includes('@sha256:')) {
-    return generatedManifest
-  }
-
-  // Parse image id specified in manifest
-  const tokens = image.split(':')
-  if (tokens.length < 2) {
-    throw new Error(`Invalid image has been specified ${image}`)
-  }
-  const tag = tokens.pop()
-  const repo = tokens.join('')
-  const client = drc.createClientV2({ name: repo })
-  debug(`fetching digest for the image ${image}`)
-
-  // fetch the digest for the image
-  return new Promise(function (resolve, reject) {
-    client.getManifest(
-      { ref: tag },
-      function (error, manifest, res, manifestStr) {
-        client.close()
-        if (error) {
-          reject(error)
-        }
-        const digest = res.headers['docker-content-digest']
-        if (!digest) {
-          reject(new Error(`Error fetching digest for image ${image}`))
-        }
-        debug(`Successfully fetched image digest for image ${image}, digest: ${digest}`)
-        container['image'] = `${repo}@${digest}`
-        resolve(container['image'])
-      }
-    )
-  })
-}
-**/
 
 module.exports = {
   generateManifest

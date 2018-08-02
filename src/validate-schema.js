@@ -1,4 +1,4 @@
-const addErrorMessage = require('./common/add-error.js').addErrorMessage
+const { addErrorMessage } = require('./common/add-error.js')
 const debug = require('debug')('codius-manifest:validate-schema')
 const jsen = require('jsen')
 const generatedManifestSpec = require('../schemas/GeneratedManifestSpec.json')

@@ -11,8 +11,8 @@ describe('Validate Containers in Manifest', function () {
   })
 
   it('should not return errors if containers in manifest are valid', function () {
-    const result = validateContainers(manifest)
-    expect(result).to.deep.equal([])
+    const errors = validateContainers(manifest)
+    expect(errors).to.deep.equal([])
   })
 
   it('should return errors if there are issues with multiple containers', function () {
@@ -32,14 +32,14 @@ describe('Validate Containers in Manifest', function () {
     // Insert environment variable without adding it to manifest.vars
     let environment = manifest['manifest']['containers'][0]['environment']
     environment['ENV_VAR'] = '$ENV_VAR'
-    const result = validateContainers(manifest)
+    const errors = validateContainers(manifest)
     const expected = [
       { 'manifest.containers[0].environment.ENV_VAR':
       'env variable is not defined within manifest.vars.' },
       { 'manifest.containers[1].environment.CODIUS_HOST':
       'environment variables starting in `CODIUS` are reserved.' }
     ]
-    expect(result).to.deep.equal(expected)
+    expect(errors).to.deep.equal(expected)
   })
 
   it('should return errors if env variable names begin with "CODIUS"', function () {
@@ -47,22 +47,20 @@ describe('Validate Containers in Manifest', function () {
     environment['CODIUS_VAR'] = '$CODIUS_VAR'
     manifest['manifest']['vars']['CODIUS_VAR'] = {'value': 'CODIUS_VAR'}
     manifest['private']['vars']['CODIUS_VAR'] = {'nonce': '1242352353', 'value': ''}
-
-    const result = validateContainers(manifest)
+    const errors = validateContainers(manifest)
     const expected = [{ 'manifest.containers[0].environment.CODIUS_VAR':
     'environment variables starting in `CODIUS` are reserved.'
     }]
-    expect(result).to.deep.equal(expected)
+    expect(errors).to.deep.equal(expected)
   })
 
   it('should return errors if env variable is not defined in manifest.vars', function () {
     let environment = manifest['manifest']['containers'][0]['environment']
     environment['ENV_VAR'] = '$ENV_VAR'
-
-    const result = validateContainers(manifest)
+    const errors = validateContainers(manifest)
     const expected = [{ 'manifest.containers[0].environment.ENV_VAR':
     'env variable is not defined within manifest.vars.' }]
-    expect(result).to.deep.equal(expected)
+    expect(errors).to.deep.equal(expected)
   })
 
   it('should return errors if encoded env variables are not defined in private manifest', function () {
@@ -71,18 +69,17 @@ describe('Validate Containers in Manifest', function () {
     manifest['manifest']['vars']['ENV_VAR'] = {
       'encoding': 'private:sha256',
       'value': '95b3449d5b13a4e60e5c0' }
-
-    const result = validateContainers(manifest)
+    const errors = validateContainers(manifest)
     const expected = [{ 'manifest.containers[0].environment.ENV_VAR':
     'encoded env variable is not defined within private manifest field' }]
-    expect(result).to.deep.equal(expected)
+    expect(errors).to.deep.equal(expected)
   })
 
   it('should return errors if two containers have the same id', function () {
     let containers = manifest['manifest']['containers']
     containers.push(manifest['manifest']['containers'][0])
-    const result = validateContainers(manifest)
+    const errors = validateContainers(manifest)
     const expected = [{ 'manifest.containers': 'container ids must be unique.' }]
-    expect(result).to.deep.equal(expected)
+    expect(errors).to.deep.equal(expected)
   })
 })

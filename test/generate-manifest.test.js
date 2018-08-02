@@ -241,5 +241,5 @@ describe('Generate Complete Manifest', function () {
     const result = generateManifest(varsMock, manifestMock)
     validManifest['manifest']['containers'][0]['image'] = `nginx@sha256:0946416199aca5c7bd2c3173f8a909b0873e9017562f1a445d061fce6664a049`
     return expect(result).to.eventually.become(validManifest)
-  })
+  }).timeout(3000)
 })

@@ -11,8 +11,8 @@ describe('Validate Entire Manifest', function () {
   })
 
   it('should not return errors if manifest is valid', function () {
-    const result = validateGeneratedManifest(manifest)
-    expect(result).to.deep.equal([])
+    const errors = validateGeneratedManifest(manifest)
+    expect(errors).to.deep.equal([])
   })
 
   it('should return proper errors if spec errors occur', function () {
@@ -20,11 +20,11 @@ describe('Validate Entire Manifest', function () {
     let environment = manifest['manifest']['containers'][0]['environment']
     environment['CODIUS_VAR'] = '$CODIUS_VAR'
     manifest['manifest']['vars']['CODIUS_VAR'] = {'value': ''}
-    const result = validateGeneratedManifest(manifest)
+    const errors = validateGeneratedManifest(manifest)
     const expected = [
       { 'manifest.containers[0].environment.CODIUS_VAR': 'environment variables starting in `CODIUS` are reserved.' }
     ]
-    expect(result).to.deep.equal(expected)
+    expect(errors).to.deep.equal(expected)
   })
 
   it('should only return schema errors if both schema and spec errors occur', function () {
@@ -36,21 +36,21 @@ describe('Validate Entire Manifest', function () {
     environment['CODIUS_VAR'] = '$CODIUS_VAR'
     manifest['manifest']['vars']['CODIUS_VAR'] = {'value': ''}
 
-    const result = validateGeneratedManifest(manifest)
+    const errors = validateGeneratedManifest(manifest)
     const expected = [
       { 'manifest.name': "schema is invalid. error={'path':'manifest.name','keyword':'required'}" }
     ]
-    expect(result).to.deep.equal(expected)
+    expect(errors).to.deep.equal(expected)
   })
 
   it('should return proper errors if public env vars are not defined', function () {
     delete manifest['manifest']['vars']
-    const result = validateGeneratedManifest(manifest)
+    const errors = validateGeneratedManifest(manifest)
     const expected = [
       { 'manifest.containers[0].environment.AWS_ACCESS_KEY': 'cannot validate env variable - manifest.vars not defined' },
       { 'manifest.containers[0].environment.AWS_SECRET_KEY': 'cannot validate env variable - manifest.vars not defined' },
       { 'private': 'cannot validate private vars - manifest.vars is not defined.' }
     ]
-    expect(result).to.deep.equal(expected)
+    expect(errors).to.deep.equal(expected)
   })
 })

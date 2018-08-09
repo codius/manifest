@@ -53,4 +53,27 @@ describe('Validate Entire Manifest', function () {
     ]
     expect(errors).to.deep.equal(expected)
   })
+
+  it('should return error if public var has encoding but private vars are undefined', function () {
+    manifest['manifest']['containers'][0]['environment'] = {
+      EXAMPLE_PUBLIC_ENV: '$EXAMPLE_PUBLIC_ENV',
+      EXAMPLE_PRIVATE_ENV: '$EXAMPLE_PRIVATE_ENV'
+    }
+    manifest['manifest']['vars'] = {
+      EXAMPLE_PUBLIC_ENV: {
+        value: 'Public Env Value'
+      },
+      EXAMPLE_PRIVATE_ENV: {
+        encoding: 'private:sha256',
+        value: '52164a473520cf78e5893a279aca159f2fe4749b958992f1ff445f4858ae60a3'
+      }
+    }
+
+    delete manifest['private']
+    const errors = validateGeneratedManifest(manifest)
+    const expected = [{
+      'manifest.vars.EXAMPLE_PRIVATE_ENV': 'public var has encoding but private.vars is undefined'
+    }]
+    expect(errors).to.deep.equal(expected)
+  })
 })

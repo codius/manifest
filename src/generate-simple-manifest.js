@@ -32,16 +32,18 @@ const processContainer = function (manifest, container) {
 
   Object.keys(environment).map((key) => {
     const value = environment[key]
+    const varName = value.substring(1)
+
     if (!value.startsWith('$')) {
       return
     }
-    const varSpec = manifest['manifest']['vars'][key]
+    const varSpec = manifest['manifest']['vars'][varName]
     if (!varSpec.encoding) {
       environment[key] = varSpec.value
       return
     }
 
-    const privateVarSpec = manifest['private']['vars'][key]
+    const privateVarSpec = manifest['private']['vars'][varName]
     environment[key] = privateVarSpec.value
   })
 }

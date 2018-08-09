@@ -136,6 +136,7 @@ The Codius manifest module exports the following functions to validate and gener
 ```
   validateGeneratedManifest(manifest)
   generateManifest(codiusVarsPath, codiusPath)
+  generateSimpleManifest(manifest)
   hashManifest(manifest)
  ```
 

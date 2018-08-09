@@ -76,4 +76,18 @@ describe('Validate Entire Manifest', function () {
     }]
     expect(errors).to.deep.equal(expected)
   })
+
+  it('should not return error manifest.vars has no encoded vars and private.vars is empty', function () {
+    manifest['manifest']['containers'][0]['environment'] = {
+      EXAMPLE_PUBLIC_ENV: '$EXAMPLE_PUBLIC_ENV'
+    }
+    manifest['manifest']['vars'] = {
+      EXAMPLE_PUBLIC_ENV: {
+        value: 'Public Env Value'
+      }
+    }
+    manifest['private'] = {}
+    const errors = validateGeneratedManifest(manifest)
+    expect(errors).to.deep.equal([])
+  })
 })

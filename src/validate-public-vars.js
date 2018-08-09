@@ -21,6 +21,16 @@ const validatePublicVars = function (manifest) {
         'public var is not used within a container'
       )
     }
+
+    const encoding = manifest['manifest']['vars'][varName]['encoding']
+    const privateVars = manifest['private']
+
+    if (encoding && !privateVars) {
+      addErrorMessage(
+        errors, `manifest.vars.${varName}`,
+        'public var has encoding but private.vars is undefined'
+      )
+    }
   })
   debug(`public variable errors: ${JSON.stringify(errors, null, 2)}`)
   return errors

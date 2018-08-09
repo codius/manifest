@@ -10,6 +10,7 @@ const axios = require('axios')
 describe('Resolve Docker Image', function () {
   // NOTE: The following tests rely on a response from the docker api v2
   beforeEach(function () {
+    this.timeout(5000)
     this.sinon = sinon.createSandbox()
     this.get = this.sinon.stub(axios, 'get')
   })

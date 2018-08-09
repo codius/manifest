@@ -6,6 +6,18 @@ const debug = require('debug')('codius-manifest:validate-privatevars')
 const validatePrivateVars = function (manifest) {
   let errors = []
   debug('validating private variables...')
+  const privateVars = manifest['private'] && manifest['private']['vars']
+  let privateVarKeys
+
+  // Check if private vars are not defined
+  if (privateVars) {
+    privateVarKeys = Object.keys(privateVars)
+    if (privateVarKeys.length < 1) {
+      return errors
+    }
+  } else {
+    return errors
+  }
 
   // Check if private vars are not defined
   if (!manifest['private']) {
@@ -20,8 +32,6 @@ const validatePrivateVars = function (manifest) {
   }
 
   const privateVarHashes = hashPrivateVars(manifest)
-  const privateVarKeys = Object.keys(manifest['private']['vars'])
-
   // Check if all private vars have consistent hashes and are used in an env
   privateVarKeys.map((varName) => {
     const privateHash = privateVarHashes[varName]

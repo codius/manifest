@@ -1,6 +1,6 @@
 {
   "name": "codius-manifest",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "A module for validating Codius manifests",
   "main": "index.js",
   "scripts": {
